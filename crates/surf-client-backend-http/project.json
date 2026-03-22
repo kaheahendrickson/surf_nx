@@ -17,7 +17,7 @@
       "inputs": ["rust", "^rust"],
       "outputs": ["{options.target-dir}"],
       "options": {
-        "command": "SOLANA_KEYPAIR_PUBKEY=791CuF8h9PZmS511wXAkRdYKyiG2mP8WkF5XggdM4VbD cargo test -p surf-client-backend-http -- --ignored",
+        "command": "cargo test -p surf-client-backend-http -- --ignored",
         "cwd": "{workspaceRoot}"
       }
     },
@@ -26,7 +26,7 @@
       "inputs": ["rust", "^rust"],
       "outputs": ["{options.target-dir}"],
       "options": {
-        "command": "SOLANA_KEYPAIR_PUBKEY=791CuF8h9PZmS511wXAkRdYKyiG2mP8WkF5XggdM4VbD wasm-pack test --node",
+        "command": "wasm-pack test --node",
         "cwd": "{workspaceRoot}/crates/surf-client-backend-http"
       }
     },
@@ -35,7 +35,7 @@
       "inputs": ["rust", "^rust"],
       "outputs": ["{options.target-dir}"],
       "options": {
-        "command": "SOLANA_KEYPAIR_PUBKEY=791CuF8h9PZmS511wXAkRdYKyiG2mP8WkF5XggdM4VbD wasm-pack test --headless --chrome --features browser-tests",
+        "command": "wasm-pack test --headless --chrome --features browser-tests",
         "cwd": "{workspaceRoot}/crates/surf-client-backend-http"
       }
     }
