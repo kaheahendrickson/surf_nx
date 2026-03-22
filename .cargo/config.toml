@@ -1,0 +1,2 @@
+[env]
+PROTOC = { value = "C:/Users/Kahea/AppData/Local/protobuf/bin/protoc.exe", relative = false }
