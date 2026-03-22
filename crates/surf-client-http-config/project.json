@@ -1,8 +1,8 @@
 {
-  "name": "surf-http-backend-config",
+  "name": "surf-client-http-config",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "root": "crates/surf-http-backend-config",
-  "sourceRoot": "crates/surf-http-backend-config/src",
+  "root": "crates/surf-client-http-config",
+  "sourceRoot": "crates/surf-client-http-config/src",
   "targets": {
     "build": {
       "executor": "@monodon/rust:build",

@@ -32,7 +32,7 @@ solana-system-interface = "2.0.0"
 solana-transaction = "3.1.0"
 surf-client = { path = "crates/surf-client" }
 surf-client-backend-browser = { path = "crates/surf-client-backend-browser" }
-surf-http-backend-config = { path = "crates/surf-http-backend-config" }
+surf-client-http-config = { path = "crates/surf-client-http-config" }
 surf-protocol = { path = "crates/surf-protocol" }
 surf-client-backend-memory = { path = "crates/surf-client-backend-memory" }
 surf-client-backend-native = { path = "crates/surf-client-backend-native" }

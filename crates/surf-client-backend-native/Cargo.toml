@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 surf-client = { workspace = true }
 surf-protocol = { workspace = true }
-surf-http-backend-config = { workspace = true }
+surf-client-http-config = { workspace = true }
 solana-pubkey = { workspace = true }
 solana-instruction = { workspace = true }
 solana-message = { workspace = true }

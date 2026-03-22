@@ -15,7 +15,7 @@ use surf_client::backend::{
 };
 use surf_client::error::Error;
 use surf_client::rpc_types::*;
-use surf_http_backend_config::HttpBackendConfig;
+use surf_client_http_config::HttpBackendConfig;
 
 pub struct HttpBackend {
     client: Client,

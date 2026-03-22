@@ -4641,7 +4641,7 @@ dependencies = [
  "solana-system-interface",
  "solana-transaction",
  "surf-client",
- "surf-http-backend-config",
+ "surf-client-http-config",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-bindgen-test",
@@ -4694,14 +4694,14 @@ dependencies = [
  "solana-system-interface",
  "solana-transaction",
  "surf-client",
- "surf-http-backend-config",
+ "surf-client-http-config",
  "surf-protocol",
  "thiserror 2.0.18",
  "tokio",
 ]
 
 [[package]]
-name = "surf-http-backend-config"
+name = "surf-client-http-config"
 version = "0.1.0"
 dependencies = [
  "rstest",

@@ -1,5 +1,5 @@
 #[cfg(target_arch = "wasm32")]
-use surf_http_backend_config::HttpBackendConfig;
+use surf_client_http_config::HttpBackendConfig;
 
 #[cfg(target_arch = "wasm32")]
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine};

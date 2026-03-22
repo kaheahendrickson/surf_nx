@@ -1,5 +1,5 @@
 [package]
-name = "surf-http-backend-config"
+name = "surf-client-http-config"
 version = "0.1.0"
 edition = "2021"
 

@@ -15,7 +15,7 @@ use solana_system_interface::instruction::transfer;
 use solana_transaction::Transaction;
 
 use surf_client::backend::{Backend, SignaturesForAddressOptions};
-use surf_http_backend_config::HttpBackendConfig;
+use surf_client_http_config::HttpBackendConfig;
 use surf_client_backend_native::HttpBackend;
 
 struct ValidatorGuard {
