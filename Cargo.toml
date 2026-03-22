@@ -30,6 +30,7 @@ solana-signer = "3.0.0"
 solana-system-interface = "2.0.0"
 solana-transaction = "3.1.0"
 surf-client = { path = "crates/surf-client" }
+surf-http-backend-config = { path = "crates/surf-http-backend-config" }
 surf-protocol = { path = "crates/surf-protocol" }
 surf-provider-memory = { path = "crates/surf-provider-memory" }
 tempfile = "3"
