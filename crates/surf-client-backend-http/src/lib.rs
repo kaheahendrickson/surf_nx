@@ -567,9 +567,31 @@ impl WasmBackend for HttpBackend {
 
 pub use surf_client::rpc_types;
 
+#[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::*;
+
+    #[fixture]
+    fn test_pubkey() -> Pubkey {
+        std::env::var("SOLANA_KEYPAIR_PUBKEY")
+            .expect("SOLANA_KEYPAIR_PUBKEY env var must be set")
+            .parse()
+            .expect("Invalid pubkey")
+    }
+
+    #[fixture]
+    fn http_backend() -> HttpBackend {
+        HttpBackend::new("http://localhost:8899")
+    }
+
+    async fn assert_get_balance_works(backend: &HttpBackend, pubkey: &Pubkey) {
+        let balance = backend.get_balance(pubkey).await;
+        assert!(balance.is_ok(), "get_balance failed: {:?}", balance.err());
+        let balance = balance.unwrap();
+        assert!(balance.is_some(), "No balance returned");
+    }
 
     #[test]
     fn test_http_backend_new() {
@@ -577,30 +599,19 @@ mod tests {
         assert_eq!(backend.url, "http://localhost:8899");
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
-    #[test]
+    #[rstest]
     fn test_http_backend_from_config() {
         let config = HttpBackendConfig::new("http://test.validator:9000")
-            .with_timeout(Duration::from_secs(45));
+            .with_timeout(std::time::Duration::from_secs(45));
         let backend = HttpBackend::from_config(config);
         assert_eq!(backend.url, "http://test.validator:9000");
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
+    #[rstest]
     #[tokio::test]
     #[ignore = "requires running validator at localhost:8899"]
-    async fn test_get_balance() {
-        let pubkey_str = std::env::var("SOLANA_KEYPAIR_PUBKEY")
-            .expect("SOLANA_KEYPAIR_PUBKEY env var must be set");
-        let pubkey: Pubkey = pubkey_str.parse().expect("Invalid pubkey");
-
-        let backend = HttpBackend::new("http://localhost:8899");
-        let balance = backend.get_balance(&pubkey).await;
-
-        assert!(balance.is_ok(), "get_balance failed: {:?}", balance.err());
-        let balance = balance.unwrap();
-        assert!(balance.is_some(), "No balance returned");
-        println!("Balance: {} lamports", balance.unwrap());
+    async fn test_get_balance_native(test_pubkey: Pubkey, http_backend: HttpBackend) {
+        assert_get_balance_works(&http_backend, &test_pubkey).await;
     }
 }
 
@@ -611,16 +622,18 @@ mod wasm_tests {
 
     const TEST_PUBKEY: &str = env!("SOLANA_KEYPAIR_PUBKEY");
 
-    #[wasm_bindgen_test::wasm_bindgen_test]
-    async fn test_get_balance() {
-        let pubkey: Pubkey = TEST_PUBKEY.parse().expect("Invalid pubkey");
-
-        let backend = HttpBackend::new("http://localhost:8899");
-        let balance = backend.get_balance(&pubkey).await;
-
+    async fn assert_get_balance_works(backend: &HttpBackend, pubkey: &Pubkey) {
+        let balance = backend.get_balance(pubkey).await;
         assert!(balance.is_ok(), "get_balance failed: {:?}", balance.err());
         let balance = balance.unwrap();
         assert!(balance.is_some(), "No balance returned");
+    }
+
+    #[wasm_bindgen_test::wasm_bindgen_test]
+    async fn test_get_balance_wasm() {
+        let pubkey: Pubkey = TEST_PUBKEY.parse().expect("Invalid pubkey");
+        let backend = HttpBackend::new("http://localhost:8899");
+        assert_get_balance_works(&backend, &pubkey).await;
     }
 }
 
@@ -637,10 +650,8 @@ mod browser_tests {
     #[wasm_bindgen_test::wasm_bindgen_test]
     async fn test_get_balance_browser() {
         let pubkey: Pubkey = TEST_PUBKEY.parse().expect("Invalid pubkey");
-
         let backend = HttpBackend::new("http://localhost:8899");
         let balance = backend.get_balance(&pubkey).await;
-
         assert!(balance.is_ok(), "get_balance failed: {:?}", balance.err());
         let balance = balance.unwrap();
         assert!(balance.is_some(), "No balance returned");
