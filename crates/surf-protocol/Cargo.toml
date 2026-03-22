@@ -1,0 +1,11 @@
+[package]
+name = "surf-protocol"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+solana-pubkey = { workspace = true, features = ["curve25519"] }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+rstest = { workspace = true }
