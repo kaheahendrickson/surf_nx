@@ -1,8 +1,8 @@
 {
-  "name": "surf-provider-browser",
+  "name": "surf-client-backend-browser",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "root": "crates/surf-provider-browser",
-  "sourceRoot": "crates/surf-provider-browser/src",
+  "root": "crates/surf-client-backend-browser",
+  "sourceRoot": "crates/surf-client-backend-browser/src",
   "targets": {
     "build": {
       "executor": "@monodon/rust:build",

@@ -55,7 +55,7 @@ async fn airdrop(url: &str, pubkey: &Pubkey, lamports: u64) -> Result<(), JsValu
 }
 
 #[wasm_bindgen]
-pub async fn run_surf_provider_browser_integration_tests(
+pub async fn run_surf_client_backend_browser_integration_tests(
     validator_url: String,
 ) -> Result<(), JsValue> {
     let backend = backend(&validator_url);

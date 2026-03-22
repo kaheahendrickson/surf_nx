@@ -4621,6 +4621,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "surf-client-backend-browser"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "bincode",
+ "getrandom 0.3.4",
+ "gloo",
+ "serde",
+ "serde_json",
+ "solana-account",
+ "solana-hash 3.1.0",
+ "solana-keypair",
+ "solana-message",
+ "solana-native-token",
+ "solana-pubkey 3.0.0",
+ "solana-signature",
+ "solana-signer",
+ "solana-system-interface",
+ "solana-transaction",
+ "surf-client",
+ "surf-http-backend-config",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-bindgen-test",
+]
+
+[[package]]
 name = "surf-client-backend-memory"
 version = "0.1.0"
 dependencies = [
@@ -4687,33 +4714,6 @@ dependencies = [
  "rstest",
  "solana-pubkey 3.0.0",
  "thiserror 2.0.18",
-]
-
-[[package]]
-name = "surf-provider-browser"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "bincode",
- "getrandom 0.3.4",
- "gloo",
- "serde",
- "serde_json",
- "solana-account",
- "solana-hash 3.1.0",
- "solana-keypair",
- "solana-message",
- "solana-native-token",
- "solana-pubkey 3.0.0",
- "solana-signature",
- "solana-signer",
- "solana-system-interface",
- "solana-transaction",
- "surf-client",
- "surf-http-backend-config",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-bindgen-test",
 ]
 
 [[package]]
