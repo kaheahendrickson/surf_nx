@@ -1,0 +1,43 @@
+{
+  "name": "surf-client-backend-http",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/surf-client-backend-http",
+  "sourceRoot": "crates/surf-client-backend-http/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "lib": true
+      }
+    },
+    "test-native": {
+      "executor": "nx:run-commands",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "command": "SOLANA_KEYPAIR_PUBKEY=791CuF8h9PZmS511wXAkRdYKyiG2mP8WkF5XggdM4VbD cargo test -p surf-client-backend-http -- --ignored",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "test-node": {
+      "executor": "nx:run-commands",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "command": "SOLANA_KEYPAIR_PUBKEY=791CuF8h9PZmS511wXAkRdYKyiG2mP8WkF5XggdM4VbD wasm-pack test --node",
+        "cwd": "{workspaceRoot}/crates/surf-client-backend-http"
+      }
+    },
+    "test-browser": {
+      "executor": "nx:run-commands",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "command": "SOLANA_KEYPAIR_PUBKEY=791CuF8h9PZmS511wXAkRdYKyiG2mP8WkF5XggdM4VbD wasm-pack test --headless --chrome --features browser-tests",
+        "cwd": "{workspaceRoot}/crates/surf-client-backend-http"
+      }
+    }
+  }
+}
