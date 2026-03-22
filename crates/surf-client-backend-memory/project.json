@@ -1,8 +1,8 @@
 {
-  "name": "surf-provider-native",
+  "name": "surf-client-backend-memory",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "root": "crates/surf-provider-native",
-  "sourceRoot": "crates/surf-provider-native/src",
+  "root": "crates/surf-client-backend-memory",
+  "sourceRoot": "crates/surf-client-backend-memory/src",
   "targets": {
     "build": {
       "executor": "@monodon/rust:build",

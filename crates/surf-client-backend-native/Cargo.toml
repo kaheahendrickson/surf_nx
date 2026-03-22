@@ -1,5 +1,5 @@
 [package]
-name = "surf-provider-native"
+name = "surf-client-backend-native"
 version = "0.1.0"
 edition = "2021"
 

@@ -7,7 +7,7 @@ use crate::handlers::handle_rpc;
 use axum::routing::post;
 use axum::Router;
 use surf_client::backend::TestBackend;
-use surf_provider_memory::MolluskBackend;
+use surf_client_backend_memory::MolluskBackend;
 use tower_http::cors::Any;
 use tower_http::cors::CorsLayer;
 

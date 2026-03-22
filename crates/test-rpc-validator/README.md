@@ -104,12 +104,12 @@ Airdrops lamports to a pubkey (test validator only).
 }
 ```
 
-## Integration with surf-provider-native
+## Integration with surf-client-backend-native
 
-Point `surf-provider-native` at the validator:
+Point `surf-client-backend-native` at the validator:
 
 ```rust
-use surf_provider_native::HttpBackend;
+use surf_client_backend_native::HttpBackend;
 use surf_client::backend::Backend;
 
 let backend = HttpBackend::new("http://127.0.0.1:8899");
@@ -118,4 +118,4 @@ let balance = backend.get_balance(&pubkey).await?;
 
 ## Use Case
 
-This validator enables browser/WASM tests to use `surf-provider-native` to connect to a local test validator, providing the same testing experience as native code with `MolluskBackend`.
+This validator enables browser/WASM tests to use `surf-client-backend-native` to connect to a local test validator, providing the same testing experience as native code with `MolluskBackend`.

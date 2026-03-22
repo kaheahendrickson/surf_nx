@@ -51,7 +51,7 @@ This crate provides a type-safe, capability-based client for interacting with SU
 
 ```rust
 use surf_client::{Surf, LocalKeypairSigner};
-use surf_provider_memory::MolluskBackend;
+use surf_client_backend_memory::MolluskBackend;
 use solana_pubkey::Pubkey;
 
 let backend = MolluskBackend::new();
@@ -112,7 +112,7 @@ client.add_program(&program_id, &program_bytes).await?;
 In-process SVM for fast tests:
 
 ```rust
-use surf_provider_memory::MolluskBackend;
+use surf_client_backend_memory::MolluskBackend;
 
 let backend = MolluskBackend::new();
 ```

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-surf-provider-memory = { workspace = true }
+surf-client-backend-memory = { workspace = true }
 surf-client = { workspace = true }
 axum = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "sync"] }

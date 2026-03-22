@@ -4291,23 +4291,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "surf-http-backend-config"
-version = "0.1.0"
-dependencies = [
- "rstest",
-]
-
-[[package]]
-name = "surf-protocol"
-version = "0.1.0"
-dependencies = [
- "rstest",
- "solana-pubkey 3.0.0",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "surf-provider-memory"
+name = "surf-client-backend-memory"
 version = "0.1.0"
 dependencies = [
  "mollusk-svm",
@@ -4330,7 +4314,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "surf-provider-native"
+name = "surf-client-backend-native"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
@@ -4357,6 +4341,22 @@ dependencies = [
  "surf-protocol",
  "thiserror 2.0.18",
  "tokio",
+]
+
+[[package]]
+name = "surf-http-backend-config"
+version = "0.1.0"
+dependencies = [
+ "rstest",
+]
+
+[[package]]
+name = "surf-protocol"
+version = "0.1.0"
+dependencies = [
+ "rstest",
+ "solana-pubkey 3.0.0",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -4451,7 +4451,7 @@ dependencies = [
  "solana-signature",
  "solana-transaction",
  "surf-client",
- "surf-provider-memory",
+ "surf-client-backend-memory",
  "thiserror 2.0.18",
  "tokio",
  "tower-http",

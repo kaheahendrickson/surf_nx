@@ -32,7 +32,8 @@ solana-transaction = "3.1.0"
 surf-client = { path = "crates/surf-client" }
 surf-http-backend-config = { path = "crates/surf-http-backend-config" }
 surf-protocol = { path = "crates/surf-protocol" }
-surf-provider-memory = { path = "crates/surf-provider-memory" }
+surf-client-backend-memory = { path = "crates/surf-client-backend-memory" }
+surf-client-backend-native = { path = "crates/surf-client-backend-native" }
 tempfile = "3"
 thiserror = "2.0"
 tokio = "1"
