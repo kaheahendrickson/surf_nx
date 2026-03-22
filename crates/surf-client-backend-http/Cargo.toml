@@ -1,0 +1,37 @@
+[package]
+name = "surf-client-backend-http"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+browser-tests = []
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+surf-client = { workspace = true }
+surf-client-http-config = { workspace = true }
+solana-pubkey = { workspace = true }
+solana-account = { workspace = true }
+solana-hash = { workspace = true }
+solana-signature = { workspace = true }
+solana-transaction = { workspace = true, features = ["bincode"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+base64 = { workspace = true }
+bincode = { workspace = true }
+reqwest = { workspace = true, features = ["json"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "time"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+gloo = { workspace = true }
+getrandom = { workspace = true, features = ["wasm_js"] }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

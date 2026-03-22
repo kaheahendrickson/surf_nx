@@ -4666,6 +4666,7 @@ dependencies = [
  "surf-client",
  "surf-client-http-config",
  "tokio",
+ "wasm-bindgen-test",
 ]
 
 [[package]]
