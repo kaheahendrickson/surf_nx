@@ -1,0 +1,18 @@
+[package]
+name = "sbf-surf-token"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+pinocchio = "0.8"
+pinocchio-system = "0.2"
+bytemuck = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+rtest = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(target_os, values(\"solana\"))"] }

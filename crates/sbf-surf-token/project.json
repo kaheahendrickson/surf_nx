@@ -1,0 +1,22 @@
+{
+  "name": "sbf-surf-token",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/sbf-surf-token",
+  "sourceRoot": "crates/sbf-surf-token/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cargo build-sbf --manifest-path crates/sbf-surf-token/Cargo.toml",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cargo test-sbf --manifest-path crates/sbf-surf-token/Cargo.toml",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}
