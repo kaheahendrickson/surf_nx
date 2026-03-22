@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use reqwest::Client;
 use solana_hash::Hash;
-use solana_keypair::{EncodableKey, Keypair};
+use solana_keypair::Keypair;
 use solana_message::Message;
 use solana_native_token::LAMPORTS_PER_SOL;
 use solana_pubkey::Pubkey;
@@ -110,10 +110,7 @@ async fn setup() -> TestContext {
 }
 
 fn load_test_keypair() -> Keypair {
-    let path = dirs::home_dir()
-        .expect("Could not find home directory")
-        .join(".config/solana/id.json");
-    Keypair::read_from_file(path).expect("Failed to load test keypair")
+    Keypair::new()
 }
 
 async fn airdrop(url: &str, pubkey: &Pubkey, lamports: u64) {
