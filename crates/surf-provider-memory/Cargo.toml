@@ -24,4 +24,4 @@ tokio = { workspace = true, features = ["rt", "sync", "rt-multi-thread"] }
 rstest = { workspace = true }
 solana-keypair = { workspace = true }
 surf-client = { workspace = true }
-tokio = { workspace = true, features = ["rt", "sync", "rt-multi-thread"] }
+tokio = { workspace = true, features = ["macros", "rt", "sync", "rt-multi-thread"] }

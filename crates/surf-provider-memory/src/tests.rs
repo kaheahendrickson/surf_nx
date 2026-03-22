@@ -1,3 +1,7 @@
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::sync::OnceLock;
+
 use rstest::{fixture, rstest};
 use solana_keypair::Keypair;
 use solana_native_token::LAMPORTS_PER_SOL;
@@ -10,22 +14,69 @@ use surf_client::signer::LocalKeypairSigner;
 
 use super::MolluskBackend;
 
+static SBF_BUILD: OnceLock<()> = OnceLock::new();
+
+fn workspace_root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(Path::parent)
+        .expect("workspace root")
+        .to_path_buf()
+}
+
+fn deploy_artifact(name: &str) -> PathBuf {
+    workspace_root().join("target/deploy").join(name)
+}
+
+fn ensure_sbf_programs_built() {
+    SBF_BUILD.get_or_init(|| {
+        let manifests = [
+            "crates/sbf-surf-token/Cargo.toml",
+            "crates/sbf-surf-name-registry/Cargo.toml",
+            "crates/sbf-surf-signals/Cargo.toml",
+        ];
+
+        for manifest in manifests {
+            let status = Command::new("cargo")
+                .arg("build-sbf")
+                .arg("--manifest-path")
+                .arg(manifest)
+                .current_dir(workspace_root())
+                .status()
+                .unwrap_or_else(|err| panic!("failed to run cargo build-sbf for {manifest}: {err}"));
+
+            assert!(status.success(), "cargo build-sbf failed for {manifest}");
+        }
+    });
+}
+
 fn load_token_program() -> Vec<u8> {
-    std::fs::read("../target/deploy/sbf_surf_token.so")
-        .or_else(|_| std::fs::read("target/deploy/sbf_surf_token.so"))
+    let path = deploy_artifact("sbf_surf_token.so");
+    if !path.exists() {
+        ensure_sbf_programs_built();
+    }
+
+    std::fs::read(path)
         .expect("failed to read sbf_surf_token.so")
 }
 
 fn load_registry_program() -> Vec<u8> {
-    std::fs::read("../target/deploy/sbf_surf_name_registry.so")
-        .or_else(|_| std::fs::read("target/deploy/sbf_surf_name_registry.so"))
+    let path = deploy_artifact("sbf_surf_name_registry.so");
+    if !path.exists() {
+        ensure_sbf_programs_built();
+    }
+
+    std::fs::read(path)
         .expect("failed to read sbf_surf_name_registry.so")
 }
 
 fn try_load_signals_program() -> Option<Vec<u8>> {
-    std::fs::read("../target/deploy/sbf_surf_signals.so")
-        .or_else(|_| std::fs::read("target/deploy/sbf_surf_signals.so"))
-        .ok()
+    let path = deploy_artifact("sbf_surf_signals.so");
+    if !path.exists() {
+        ensure_sbf_programs_built();
+    }
+
+    std::fs::read(path).ok()
 }
 
 #[fixture]

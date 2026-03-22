@@ -1,5 +1,7 @@
 use std::collections::HashMap;
+use std::env;
 use std::sync::Arc;
+use std::sync::OnceLock;
 
 use mollusk_svm::program::{create_program_account_loader_v3, keyed_account_for_system_program};
 use mollusk_svm::Mollusk;
@@ -21,6 +23,17 @@ use surf_client::error::Error;
 const DEFAULT_LOADER: Pubkey = solana_sdk_ids::bpf_loader_upgradeable::id();
 const SYSTEM_PROGRAM: Pubkey = solana_sdk_ids::system_program::id();
 const SYSTEM_TRANSFER_TAG: u32 = 2;
+static MOLLUSK_LOG_INIT: OnceLock<()> = OnceLock::new();
+
+fn suppress_mollusk_logs_by_default() {
+    MOLLUSK_LOG_INIT.get_or_init(|| {
+        if env::var_os("RUST_LOG").is_none() {
+            unsafe {
+                env::set_var("RUST_LOG", "error");
+            }
+        }
+    });
+}
 
 #[derive(Clone)]
 struct StoredTransaction {
@@ -42,6 +55,8 @@ pub struct MolluskBackend {
 
 impl MolluskBackend {
     pub fn new() -> Self {
+        suppress_mollusk_logs_by_default();
+
         Self {
             state: Arc::new(Mutex::new(MolluskState {
                 accounts: HashMap::new(),
