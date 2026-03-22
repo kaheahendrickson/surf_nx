@@ -4160,6 +4160,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "surf-http-backend-config"
+version = "0.1.0"
+dependencies = [
+ "rstest",
+]
+
+[[package]]
 name = "surf-protocol"
 version = "0.1.0"
 dependencies = [
