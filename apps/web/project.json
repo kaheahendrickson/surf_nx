@@ -1,0 +1,46 @@
+{
+  "name": "@surf/web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/web/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/web",
+        "root": "apps/web",
+        "fileReplacements": []
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "optimize": true
+        }
+      }
+    },
+    "dev": {
+      "executor": "@nx/next:dev",
+      "options": {
+        "port": 3000,
+        "devDir": "apps/web"
+      }
+    },
+    "serve": {
+      "executor": "@nx/next:serve",
+      "options": {
+        "port": 3000,
+        "devDir": "apps/web"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "web:build:development"
+        },
+        "production": {
+          "buildTarget": "web:build:production"
+        }
+      }
+    }
+  }
+}

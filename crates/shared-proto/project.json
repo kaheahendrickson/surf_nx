@@ -1,0 +1,23 @@
+{
+  "name": "shared-proto",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/shared-proto",
+  "sourceRoot": "crates/shared-proto/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "cargoOptions": {
+          "lib": true
+        }
+      }
+    },
+    "test": {
+      "executor": "@monodon/rust:test",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"]
+    }
+  }
+}

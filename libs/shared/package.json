@@ -1,0 +1,12 @@
+{
+  "name": "@surf/shared",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/generated/index.ts",
+  "types": "./src/generated/index.ts",
+  "exports": {
+    ".": "./src/generated/index.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,11 @@
+[package]
+name = "shared-proto"
+version = "0.1.0"
+edition = "2021"
+description = "Shared protobuf types for Surf"
+
+[dependencies]
+prost = "0.13"
+
+[build-dependencies]
+prost-build = "0.13"

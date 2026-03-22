@@ -1,0 +1,34 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "rust": [
+      "default",
+      "!{projectRoot}/target/**",
+      "!{projectRoot}/**/*.rs.bk",
+      "{workspaceRoot}/Cargo.toml",
+      "{workspaceRoot}/Cargo.lock",
+      { "externalDependencies": ["npm:@monodon/rust"] }
+    ],
+    "production": ["default", "!{projectRoot}/**/*.spec.ts", "!{projectRoot}/**/*.test.ts", "!{projectRoot}/**/*.spec.tsx", "!{projectRoot}/**/*.test.tsx"]
+  },
+  "plugins": ["@monodon/rust"],
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "cache": true
+    }
+  },
+  "generators": {
+    "@nx/next": {
+      "application": {
+        "style": "css",
+        "appRouter": false
+      }
+    }
+  }
+}

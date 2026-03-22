@@ -1,0 +1,15 @@
+{
+  "name": "shared",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/src",
+  "targets": {
+    "generate": {
+      "executor": "nx:run-commands",
+      "outputs": ["libs/shared/src/generated"],
+      "options": {
+        "command": "npx buf generate --config proto/buf.gen.yaml",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}
