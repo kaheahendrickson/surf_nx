@@ -2682,6 +2682,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "sbf-surf-signals"
+version = "0.1.0"
+dependencies = [
+ "pinocchio",
+ "pinocchio-system",
+]
+
+[[package]]
 name = "sbf-surf-token"
 version = "0.1.0"
 dependencies = [
