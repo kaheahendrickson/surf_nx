@@ -1,4 +1,9 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let protoc = protoc_bin_vendored::protoc_bin_path()?;
+    unsafe {
+        std::env::set_var("PROTOC", protoc);
+    }
+
     let proto_files = &["../../proto/message.proto"];
     let out_dir = std::path::Path::new("src/generated");
 

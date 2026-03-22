@@ -9,9 +9,7 @@
       "inputs": ["rust", "^rust"],
       "outputs": ["{options.target-dir}"],
       "options": {
-        "cargoOptions": {
-          "lib": true
-        }
+        "lib": true
       }
     },
     "test": {
