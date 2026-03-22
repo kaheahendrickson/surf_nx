@@ -44,10 +44,16 @@ pub async fn handle_rpc(
         }
         "getTransaction" => handle_get_transaction(&state, &rpc_request.params).await,
         "requestAirdrop" => handle_request_airdrop(&state, &rpc_request.params).await,
-        _ => Err(RpcError::Backend(format!(
-            "Method not found: {}",
-            rpc_request.method
-        ))),
+        "getHealth" => Ok(serde_json::json!("ok")),
+        "getSignatureStatuses" => handle_get_signature_statuses(&state, &rpc_request.params).await,
+        "isBlockhashValid" => Ok(serde_json::json!({ "context": { "slot": 1 }, "value": true })),
+        _ => {
+            eprintln!("Unknown method: {}", rpc_request.method);
+            Err(RpcError::Backend(format!(
+                "Method not found: {}",
+                rpc_request.method
+            )))
+        }
     };
 
     let response = match result {
@@ -121,7 +127,8 @@ async fn handle_get_balance(state: &AppState, params: &[Value]) -> Result<Value,
         .backend
         .get_balance(&pubkey)
         .await
-        .map_err(RpcError::from)?;
+        .map_err(RpcError::from)?
+        .unwrap_or(0);
 
     Ok(serde_json::to_value(RpcContextResult::new(balance)).unwrap())
 }
@@ -341,27 +348,47 @@ async fn handle_request_airdrop(state: &AppState, params: &[Value]) -> Result<Va
         .parse()
         .map_err(|_| RpcError::InvalidPubkey(pubkey_str.to_string()))?;
 
-    state
+    let signature = state
         .backend
         .airdrop(&pubkey, lamports)
         .await
         .map_err(RpcError::from)?;
 
-    airdrop_result(&pubkey)
+    Ok(serde_json::json!(signature.to_string()))
 }
 
-fn airdrop_result(pubkey: &Pubkey) -> Result<Value, RpcError> {
-    use solana_hash::Hash;
+async fn handle_get_signature_statuses(
+    state: &AppState,
+    params: &[Value],
+) -> Result<Value, RpcError> {
+    let sig_strs = params
+        .get(0)
+        .and_then(|v| v.as_array())
+        .ok_or_else(|| RpcError::MissingParam("signatures".to_string()))?;
 
-    let fake_sig: [u8; 64] = {
-        let mut arr = [0u8; 64];
-        arr[..32].copy_from_slice(pubkey.as_ref());
-        arr
-    };
+    let mut statuses: Vec<Option<Value>> = Vec::new();
+    for sig_str in sig_strs {
+        let status = if let Some(sig_str) = sig_str.as_str() {
+            if let Ok(signature) = sig_str.parse::<Signature>() {
+                if let Some(tx) = state.backend.get_transaction(&signature).await.ok().flatten() {
+                    Some(serde_json::json!({
+                        "slot": tx.slot,
+                        "confirmations": None::<u64>,
+                        "err": null,
+                        "status": { "Ok": null },
+                        "confirmationStatus": "finalized"
+                    }))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        statuses.push(status);
+    }
 
-    let _fake_blockhash = Hash::new_from_array([1u8; 32]);
-
-    Ok(serde_json::json!(
-        base64::engine::general_purpose::STANDARD.encode(fake_sig)
-    ))
+    Ok(serde_json::json!({ "context": { "slot": 1 }, "value": statuses }))
 }

@@ -34,6 +34,7 @@ surf-client = { path = "crates/surf-client" }
 surf-client-backend-browser = { path = "crates/surf-client-backend-browser" }
 surf-client-http-config = { path = "crates/surf-client-http-config" }
 surf-protocol = { path = "crates/surf-protocol" }
+surf-client-backend-http = { path = "crates/surf-client-backend-http" }
 surf-client-backend-memory = { path = "crates/surf-client-backend-memory" }
 surf-client-backend-native = { path = "crates/surf-client-backend-native" }
 tempfile = "3"

@@ -377,14 +377,33 @@ impl Backend for MolluskBackend {
 }
 
 impl TestBackend for MolluskBackend {
-    async fn airdrop(&self, pubkey: &Pubkey, lamports: u64) -> Result<(), Error> {
+    async fn airdrop(&self, pubkey: &Pubkey, lamports: u64) -> Result<Signature, Error> {
         let mut state = self.state.lock().await;
         let account = state.accounts.entry(*pubkey).or_insert_with(|| Account {
             owner: SYSTEM_PROGRAM,
             ..Account::default()
         });
         account.lamports += lamports;
-        Ok(())
+
+        let fake_sig: [u8; 64] = {
+            let mut arr = [0u8; 64];
+            arr[..32].copy_from_slice(pubkey.as_ref());
+            arr
+        };
+        let signature = Signature::from(fake_sig);
+
+        let slot = state.next_slot;
+        let fake_tx = Transaction {
+            signatures: vec![signature],
+            message: solana_message::Message::default(),
+        };
+        state.transactions.push(StoredTransaction {
+            slot,
+            transaction: fake_tx,
+        });
+        state.next_slot += 1;
+
+        Ok(signature)
     }
 
     async fn add_program(&self, program_id: &Pubkey, bytes: &[u8]) -> Result<(), Error> {

@@ -4648,6 +4648,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "surf-client-backend-http"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "bincode",
+ "getrandom 0.3.4",
+ "gloo",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "solana-account",
+ "solana-hash 3.1.0",
+ "solana-pubkey 3.0.0",
+ "solana-signature",
+ "solana-transaction",
+ "surf-client",
+ "surf-client-http-config",
+ "tokio",
+]
+
+[[package]]
 name = "surf-client-backend-memory"
 version = "0.1.0"
 dependencies = [

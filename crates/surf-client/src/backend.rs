@@ -136,7 +136,7 @@ pub trait TestBackend: Backend {
         &self,
         pubkey: &Pubkey,
         lamports: u64,
-    ) -> impl Future<Output = Result<(), Error>> + Send;
+    ) -> impl Future<Output = Result<Signature, Error>> + Send;
     fn add_program(
         &self,
         program_id: &Pubkey,
