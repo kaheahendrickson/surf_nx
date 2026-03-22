@@ -3,7 +3,10 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.dependencies]
+bytemuck = { version = "1", features = ["derive"] }
 getrandom = "0.3"
+pinocchio = "0.8"
+pinocchio-system = "0.2"
 reqwest = "0.12"
 rstest = "0.25"
 serde = { version = "1", features = ["derive"] }

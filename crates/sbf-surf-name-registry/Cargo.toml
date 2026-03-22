@@ -1,5 +1,5 @@
 [package]
-name = "sbf-surf-token"
+name = "sbf-surf-name-registry"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,7 +9,6 @@ crate-type = ["cdylib", "lib"]
 [dependencies]
 pinocchio = { workspace = true }
 pinocchio-system = { workspace = true }
-bytemuck = { workspace = true }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ["cfg(target_os, values(\"solana\"))"] }

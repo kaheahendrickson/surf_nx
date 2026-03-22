@@ -1,0 +1,22 @@
+{
+  "name": "sbf-surf-name-registry",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/sbf-surf-name-registry",
+  "sourceRoot": "crates/sbf-surf-name-registry/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cargo build-sbf --manifest-path crates/sbf-surf-name-registry/Cargo.toml",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cargo test-sbf --manifest-path crates/sbf-surf-name-registry/Cargo.toml",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}
