@@ -3,7 +3,9 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.dependencies]
-solana-pubkey = "4.1"
-solana-program = "4.0"
-thiserror = "2.0"
 rstest = "0.25"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+solana-program = "3.0"
+solana-pubkey = "3.0"
+thiserror = "2.0"
