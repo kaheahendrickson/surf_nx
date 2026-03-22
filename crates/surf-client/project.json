@@ -1,0 +1,21 @@
+{
+  "name": "surf-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/surf-client",
+  "sourceRoot": "crates/surf-client/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "lib": true
+      }
+    },
+    "test": {
+      "executor": "@monodon/rust:test",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"]
+    }
+  }
+}
