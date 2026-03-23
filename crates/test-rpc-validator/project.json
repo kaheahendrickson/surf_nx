@@ -12,6 +12,7 @@
     },
     "test": {
       "executor": "@monodon/rust:test",
+      "dependsOn": ["^build"],
       "inputs": ["rust", "^rust"],
       "outputs": ["{options.target-dir}"]
     },
