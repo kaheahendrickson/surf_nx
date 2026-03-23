@@ -17,7 +17,7 @@
       "inputs": ["rust", "^rust"],
       "outputs": ["{options.target-dir}"],
       "options": {
-        "command": "cargo test -p surf-client-backend-http -- --ignored",
+        "command": "cargo test -p surf-client-backend-http --lib --tests",
         "cwd": "{workspaceRoot}"
       }
     },
