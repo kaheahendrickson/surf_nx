@@ -16,6 +16,15 @@
       "executor": "@monodon/rust:test",
       "inputs": ["rust", "^rust"],
       "outputs": ["{options.target-dir}"]
+    },
+    "test-wasm": {
+      "executor": "nx:run-commands",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "command": "wasm-pack test --headless --chrome",
+        "cwd": "{workspaceRoot}/crates/surf-store"
+      }
     }
   }
 }

@@ -26,7 +26,7 @@
 //!
 //! ## Example
 //!
-//! ```rust,no_run
+//! ```rust,ignore
 //! use surf_store::{KeyValueStore, MemoryStore, NAMES};
 //!
 //! #[tokio::main]
@@ -50,7 +50,8 @@ pub mod column_families;
 pub mod error;
 pub mod memory;
 #[cfg(target_arch = "wasm32")]
-pub mod playwright_harness;
+#[cfg(test)]
+mod wasm_tests;
 pub mod r#trait;
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -72,5 +73,3 @@ pub use native::NativeStore;
 
 #[cfg(target_arch = "wasm32")]
 pub use opfs::OpfsStore;
-#[cfg(target_arch = "wasm32")]
-pub use playwright_harness::run_surf_store_browser_integration_tests;
