@@ -4575,6 +4575,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "surf-query"
+version = "0.1.0"
+dependencies = [
+ "getrandom 0.3.4",
+ "rstest",
+ "solana-pubkey 3.0.0",
+ "solana-signature",
+ "surf-protocol",
+ "surf-store",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
 name = "surf-store"
 version = "0.1.0"
 dependencies = [

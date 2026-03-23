@@ -1,0 +1,22 @@
+{
+  "name": "surf-query",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/surf-query",
+  "sourceRoot": "crates/surf-query/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "lib": true
+      }
+    },
+    "test": {
+      "executor": "@monodon/rust:test",
+      "dependsOn": ["^build"],
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"]
+    }
+  }
+}
