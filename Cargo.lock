@@ -4795,6 +4795,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "surf-executor"
+version = "0.1.0"
+dependencies = [
+ "rstest",
+ "wasm-bindgen-test",
+]
+
+[[package]]
 name = "surf-protocol"
 version = "0.1.0"
 dependencies = [

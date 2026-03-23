@@ -1,0 +1,32 @@
+{
+  "name": "surf-executor",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/surf-executor",
+  "sourceRoot": "crates/surf-executor/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "lib": true
+      }
+    },
+    "test": {
+      "executor": "@monodon/rust:test",
+      "dependsOn": ["^build"],
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"]
+    },
+    "test-wasm": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "command": "wasm-pack test --headless --chrome",
+        "cwd": "{workspaceRoot}/crates/surf-executor"
+      }
+    }
+  }
+}
