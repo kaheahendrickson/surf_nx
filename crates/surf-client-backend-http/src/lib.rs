@@ -565,6 +565,7 @@ impl WasmBackend for HttpBackend {
     }
 }
 
+
 pub use surf_client::rpc_types;
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -615,19 +616,20 @@ mod tests {
     }
 }
 
+#[cfg(all(target_arch = "wasm32", test))]
+async fn assert_get_balance_works(backend: &HttpBackend, pubkey: &Pubkey) {
+    let balance = backend.get_balance(pubkey).await;
+    assert!(balance.is_ok(), "get_balance failed: {:?}", balance.err());
+    let balance = balance.unwrap();
+    assert!(balance.is_some(), "No balance returned");
+}
+
 #[cfg(target_arch = "wasm32")]
 #[cfg(test)]
 mod wasm_tests {
     use super::*;
 
     const TEST_PUBKEY: &str = env!("SOLANA_KEYPAIR_PUBKEY");
-
-    async fn assert_get_balance_works(backend: &HttpBackend, pubkey: &Pubkey) {
-        let balance = backend.get_balance(pubkey).await;
-        assert!(balance.is_ok(), "get_balance failed: {:?}", balance.err());
-        let balance = balance.unwrap();
-        assert!(balance.is_some(), "No balance returned");
-    }
 
     #[wasm_bindgen_test::wasm_bindgen_test]
     async fn test_get_balance_wasm() {
@@ -651,9 +653,6 @@ mod browser_tests {
     async fn test_get_balance_browser() {
         let pubkey: Pubkey = TEST_PUBKEY.parse().expect("Invalid pubkey");
         let backend = HttpBackend::new("http://localhost:8899");
-        let balance = backend.get_balance(&pubkey).await;
-        assert!(balance.is_ok(), "get_balance failed: {:?}", balance.err());
-        let balance = balance.unwrap();
-        assert!(balance.is_some(), "No balance returned");
+        assert_get_balance_works(&backend, &pubkey).await;
     }
 }
