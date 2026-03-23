@@ -1,0 +1,28 @@
+{
+  "name": "surf-cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/surf-cli",
+  "sourceRoot": "crates/surf-cli/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "dependsOn": ["^build"],
+      "outputs": ["{options.target-dir}"]
+    },
+    "test": {
+      "executor": "@monodon/rust:test",
+      "dependsOn": ["^build"],
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"]
+    },
+    "run": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "cargo run --manifest-path crates/surf-cli/Cargo.toml",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}

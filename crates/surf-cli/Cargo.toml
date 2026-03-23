@@ -1,0 +1,24 @@
+[package]
+name = "surf-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+solana-keypair = { workspace = true }
+solana-pubkey = { workspace = true }
+solana-signer = { workspace = true }
+solana-message = { workspace = true }
+solana-transaction = { workspace = true, features = ["bincode"] }
+solana-system-interface = { workspace = true, features = ["bincode"] }
+surf-client = { workspace = true }
+surf-client-http-config = { workspace = true }
+surf-client-backend-http = { workspace = true }
+surf-protocol = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+
+[dev-dependencies]
+reqwest = { workspace = true, features = ["json"] }
+tempfile = { workspace = true }

@@ -4657,6 +4657,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
+name = "surf-cli"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "solana-keypair",
+ "solana-message",
+ "solana-pubkey 3.0.0",
+ "solana-signer",
+ "solana-system-interface",
+ "solana-transaction",
+ "surf-client",
+ "surf-client-backend-http",
+ "surf-client-http-config",
+ "surf-protocol",
+ "tempfile",
+ "tokio",
+]
+
+[[package]]
 name = "surf-client"
 version = "0.1.0"
 dependencies = [
