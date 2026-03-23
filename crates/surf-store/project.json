@@ -1,0 +1,21 @@
+{
+  "name": "surf-store",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/surf-store",
+  "sourceRoot": "crates/surf-store/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "lib": true
+      }
+    },
+    "test": {
+      "executor": "@monodon/rust:test",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"]
+    }
+  }
+}
