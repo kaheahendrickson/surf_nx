@@ -4754,6 +4754,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "surf-events-server"
+version = "0.1.0"
+dependencies = [
+ "async-nats",
+ "bytes",
+ "serde",
+ "serde_json",
+ "solana-pubkey 3.0.0",
+ "solana-signature",
+ "surf-client",
+ "surf-client-backend-http",
+ "surf-events",
+ "surf-protocol",
+ "surf-sync",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
 name = "surf-protocol"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,19 @@
+[package]
+name = "surf-events-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-nats = { workspace = true }
+bytes = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+solana-pubkey = { workspace = true }
+solana-signature = { workspace = true }
+surf-client = { workspace = true }
+surf-client-backend-http = { workspace = true }
+surf-events = { workspace = true }
+surf-protocol = { workspace = true }
+surf-sync = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }
