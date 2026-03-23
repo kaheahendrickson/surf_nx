@@ -1,0 +1,20 @@
+{
+  "name": "test-nats-server",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/test-nats-server",
+  "sourceRoot": "crates/test-nats-server/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "dependsOn": ["^build"],
+      "outputs": ["{options.target-dir}"]
+    },
+    "test": {
+      "executor": "@monodon/rust:test",
+      "dependsOn": ["^build"],
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"]
+    }
+  }
+}

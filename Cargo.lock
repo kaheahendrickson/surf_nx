@@ -4894,6 +4894,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "test-nats-server"
+version = "0.1.0"
+dependencies = [
+ "async-nats",
+ "bytes",
+ "futures",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
 name = "test-rpc-validator"
 version = "0.1.0"
 dependencies = [

@@ -8,6 +8,7 @@ axum = "0.8"
 base64 = "0.22"
 bincode = "1.3"
 borsh = "1"
+bytes = "1"
 bytemuck = { version = "1", features = ["derive"] }
 clap = { version = "4.5", features = ["derive"] }
 futures = "0.3"
