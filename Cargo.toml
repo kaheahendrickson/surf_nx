@@ -3,11 +3,14 @@ members = ["crates/*"]
 resolver = "2"
 
 [workspace.dependencies]
+async-nats = "0.42"
 axum = "0.8"
 base64 = "0.22"
 bincode = "1.3"
+borsh = "1"
 bytemuck = { version = "1", features = ["derive"] }
 clap = { version = "4.5", features = ["derive"] }
+futures = "0.3"
 getrandom = { version = "0.3", features = ["wasm_js"] }
 gloo = { version = "0.11", features = ["futures"] }
 hex = "0.4"
@@ -40,6 +43,7 @@ surf-events = { path = "crates/surf-events" }
 surf-protocol = { path = "crates/surf-protocol" }
 surf-query = { path = "crates/surf-query" }
 surf-store = { path = "crates/surf-store" }
+surf-sync = { path = "crates/surf-sync" }
 surf-client-backend-http = { path = "crates/surf-client-backend-http" }
 surf-client-backend-memory = { path = "crates/surf-client-backend-memory" }
 surf-client-backend-native = { path = "crates/surf-client-backend-native" }

@@ -1,0 +1,22 @@
+{
+  "name": "surf-sync",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/surf-sync",
+  "sourceRoot": "crates/surf-sync/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "lib": true
+      }
+    },
+    "test": {
+      "executor": "@monodon/rust:test",
+      "dependsOn": ["^build"],
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"]
+    }
+  }
+}
