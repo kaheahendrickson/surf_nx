@@ -4750,6 +4750,7 @@ dependencies = [
  "serde_json",
  "solana-pubkey 3.0.0",
  "solana-signature",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -4769,6 +4770,7 @@ dependencies = [
  "rstest",
  "solana-pubkey 3.0.0",
  "solana-signature",
+ "surf-events",
  "surf-protocol",
  "surf-store",
  "thiserror 2.0.18",

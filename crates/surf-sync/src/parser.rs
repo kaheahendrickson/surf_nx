@@ -3,6 +3,7 @@
 use solana_pubkey::Pubkey;
 use solana_sdk_ids::system_program;
 use surf_client::ParsedTransaction;
+use surf_events::ActivityKind;
 use surf_protocol::SignalKind;
 
 use crate::error::SyncError;
@@ -21,44 +22,6 @@ pub struct ParsedRegister {
     pub name: [u8; 32],
     /// The actual length of the name.
     pub name_len: u8,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ActivityKind {
-    SolSent,
-    SolReceived,
-    SurfSent,
-    SurfReceived,
-    NameRegistered,
-    Followed,
-    Unfollowed,
-}
-
-impl ActivityKind {
-    pub fn as_u8(self) -> u8 {
-        match self {
-            Self::SolSent => 0,
-            Self::SolReceived => 1,
-            Self::SurfSent => 2,
-            Self::SurfReceived => 3,
-            Self::NameRegistered => 4,
-            Self::Followed => 5,
-            Self::Unfollowed => 6,
-        }
-    }
-
-    pub fn from_u8(value: u8) -> Result<Self, SyncError> {
-        match value {
-            0 => Ok(Self::SolSent),
-            1 => Ok(Self::SolReceived),
-            2 => Ok(Self::SurfSent),
-            3 => Ok(Self::SurfReceived),
-            4 => Ok(Self::NameRegistered),
-            5 => Ok(Self::Followed),
-            6 => Ok(Self::Unfollowed),
-            _ => Err(SyncError::InvalidInstruction),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -6,32 +6,30 @@ use std::collections::HashMap;
 use std::str;
 
 use solana_pubkey::Pubkey;
-// TODO: Uncomment when surf-sync is added
-// use surf_sync::{ActivityKind, ActivityRecord, FollowRecord};
+use solana_signature::Signature;
+use surf_events::{ActivityKind, ActivityRecord, FollowRecord};
 use surf_protocol::decode_name_record;
-use surf_store::{KeyValueStore, NAMES};
+use surf_store::{KeyValueStore, NAMES, TRANSACTIONS, FOLLOWS};
 
-// TODO: Uncomment when surf-sync is added
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub struct ActivityView {
-//     pub signature: String,
-//     pub kind: String,
-//     pub counterparty: String,
-//     pub counterparty_name: Option<String>,
-//     pub amount: u64,
-//     pub slot: u64,
-//     pub block_time: Option<i64>,
-// }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ActivityView {
+    pub signature: String,
+    pub kind: String,
+    pub counterparty: String,
+    pub counterparty_name: Option<String>,
+    pub amount: u64,
+    pub slot: u64,
+    pub block_time: Option<i64>,
+}
 
-// TODO: Uncomment when surf-sync is added
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub struct FollowingView {
-//     pub target: String,
-//     pub target_name: Option<String>,
-//     pub slot: u64,
-//     pub block_time: Option<i64>,
-//     pub signature: String,
-// }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FollowingView {
+    pub target: String,
+    pub target_name: Option<String>,
+    pub slot: u64,
+    pub block_time: Option<i64>,
+    pub signature: String,
+}
 
 pub async fn get_names<S: KeyValueStore>(store: &S) -> Result<Vec<String>, QueryError> {
     let keys = store.list_keys(NAMES).await?;
@@ -60,76 +58,73 @@ pub async fn get_names<S: KeyValueStore>(store: &S) -> Result<Vec<String>, Query
     Ok(names)
 }
 
-// TODO: Uncomment when surf-sync is added
-// pub async fn get_transactions<S: KeyValueStore>(store: &S) -> Result<Vec<ActivityView>, QueryError> {
-//     let owner_names = get_owner_name_map(store).await?;
-//     let keys = store.list_keys(TRANSACTIONS).await?;
-//     let mut activities = Vec::with_capacity(keys.len());
-//
-//     for key in keys {
-//         let Some(raw) = store.get(TRANSACTIONS, &key).await? else {
-//             continue;
-//         };
-//
-//         let record = ActivityRecord::decode(&raw).map_err(|_| QueryError::InvalidAccountData)?;
-//         let counterparty_name = owner_names.get(&record.counterparty).cloned();
-//         let signature = Signature::try_from(record.signature.as_slice())
-//             .map_err(|_| QueryError::InvalidAccountData)?;
-//
-//         activities.push(ActivityView {
-//             signature: signature.to_string(),
-//             kind: activity_kind_label(record.kind).to_string(),
-//             counterparty: record.counterparty.to_string(),
-//             counterparty_name,
-//             amount: record.amount,
-//             slot: record.slot,
-//             block_time: normalize_block_time(record.block_time),
-//         });
-//     }
-//
-//     activities.sort_by(|left, right| {
-//         right
-//             .slot
-//             .cmp(&left.slot)
-//             .then_with(|| right.signature.cmp(&left.signature))
-//     });
-//     Ok(activities)
-// }
+pub async fn get_transactions<S: KeyValueStore>(store: &S) -> Result<Vec<ActivityView>, QueryError> {
+    let owner_names = get_owner_name_map(store).await?;
+    let keys = store.list_keys(TRANSACTIONS).await?;
+    let mut activities = Vec::with_capacity(keys.len());
 
-// TODO: Uncomment when surf-sync is added
-// pub async fn get_following<S: KeyValueStore>(store: &S) -> Result<Vec<FollowingView>, QueryError> {
-//     let owner_names = get_owner_name_map(store).await?;
-//     let keys = store.list_keys(FOLLOWS).await?;
-//     let mut follows = Vec::with_capacity(keys.len());
-//
-//     for key in keys {
-//         let Some(raw) = store.get(FOLLOWS, &key).await? else {
-//             continue;
-//         };
-//
-//         let target = Pubkey::try_from(key.as_slice()).map_err(|_| QueryError::InvalidAccountData)?;
-//         let record = FollowRecord::decode(&raw).map_err(|_| QueryError::InvalidAccountData)?;
-//         let signature = Signature::try_from(record.signature.as_slice())
-//             .map_err(|_| QueryError::InvalidAccountData)?;
-//
-//         follows.push(FollowingView {
-//             target: target.to_string(),
-//             target_name: owner_names.get(&target).cloned(),
-//             slot: record.slot,
-//             block_time: normalize_block_time(record.block_time),
-//             signature: signature.to_string(),
-//         });
-//     }
-//
-//     follows.sort_by(|left, right| {
-//         left.target_name
-//             .cmp(&right.target_name)
-//             .then_with(|| left.target.cmp(&right.target))
-//     });
-//     Ok(follows)
-// }
+    for key in keys {
+        let Some(raw) = store.get(TRANSACTIONS, &key).await? else {
+            continue;
+        };
 
-#[allow(dead_code)]
+        let record = ActivityRecord::decode(&raw).map_err(|_| QueryError::InvalidAccountData)?;
+        let counterparty_name = owner_names.get(&record.counterparty).cloned();
+        let signature = Signature::try_from(record.signature.as_slice())
+            .map_err(|_| QueryError::InvalidAccountData)?;
+
+        activities.push(ActivityView {
+            signature: signature.to_string(),
+            kind: activity_kind_label(record.kind).to_string(),
+            counterparty: record.counterparty.to_string(),
+            counterparty_name,
+            amount: record.amount,
+            slot: record.slot,
+            block_time: normalize_block_time(record.block_time),
+        });
+    }
+
+    activities.sort_by(|left, right| {
+        right
+            .slot
+            .cmp(&left.slot)
+            .then_with(|| right.signature.cmp(&left.signature))
+    });
+    Ok(activities)
+}
+
+pub async fn get_following<S: KeyValueStore>(store: &S) -> Result<Vec<FollowingView>, QueryError> {
+    let owner_names = get_owner_name_map(store).await?;
+    let keys = store.list_keys(FOLLOWS).await?;
+    let mut follows = Vec::with_capacity(keys.len());
+
+    for key in keys {
+        let Some(raw) = store.get(FOLLOWS, &key).await? else {
+            continue;
+        };
+
+        let target = Pubkey::try_from(key.as_slice()).map_err(|_| QueryError::InvalidAccountData)?;
+        let record = FollowRecord::decode(&raw).map_err(|_| QueryError::InvalidAccountData)?;
+        let signature = Signature::try_from(record.signature.as_slice())
+            .map_err(|_| QueryError::InvalidAccountData)?;
+
+        follows.push(FollowingView {
+            target: target.to_string(),
+            target_name: owner_names.get(&target).cloned(),
+            slot: record.slot,
+            block_time: normalize_block_time(record.block_time),
+            signature: signature.to_string(),
+        });
+    }
+
+    follows.sort_by(|left, right| {
+        left.target_name
+            .cmp(&right.target_name)
+            .then_with(|| left.target.cmp(&right.target))
+    });
+    Ok(follows)
+}
+
 async fn get_owner_name_map<S: KeyValueStore>(store: &S) -> Result<HashMap<Pubkey, String>, QueryError> {
     let keys = store.list_keys(NAMES).await?;
     let mut names = HashMap::with_capacity(keys.len());
@@ -155,20 +150,18 @@ async fn get_owner_name_map<S: KeyValueStore>(store: &S) -> Result<HashMap<Pubke
     Ok(names)
 }
 
-// TODO: Uncomment when surf-sync is added
-// fn activity_kind_label(kind: ActivityKind) -> &'static str {
-//     match kind {
-//         ActivityKind::SolSent => "sol_sent",
-//         ActivityKind::SolReceived => "sol_received",
-//         ActivityKind::SurfSent => "surf_sent",
-//         ActivityKind::SurfReceived => "surf_received",
-//         ActivityKind::NameRegistered => "name_registered",
-//         ActivityKind::Followed => "followed",
-//         ActivityKind::Unfollowed => "unfollowed",
-//     }
-// }
+fn activity_kind_label(kind: ActivityKind) -> &'static str {
+    match kind {
+        ActivityKind::SolSent => "sol_sent",
+        ActivityKind::SolReceived => "sol_received",
+        ActivityKind::SurfSent => "surf_sent",
+        ActivityKind::SurfReceived => "surf_received",
+        ActivityKind::NameRegistered => "name_registered",
+        ActivityKind::Followed => "followed",
+        ActivityKind::Unfollowed => "unfollowed",
+    }
+}
 
-#[allow(dead_code)]
 fn normalize_block_time(value: i64) -> Option<i64> {
     if value < 0 {
         None

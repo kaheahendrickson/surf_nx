@@ -1,12 +1,13 @@
 use std::sync::Arc;
 
 use solana_signature::Signature;
+use surf_events::ActivityRecord;
 use surf_store::{KeyValueStore, TRANSACTIONS};
 
 use crate::checkpoint::{save_checkpoint, SyncCheckpoint, ACTIVITY_SYNC_KEY};
 use crate::config::SyncConfig;
 use crate::error::SyncError;
-use crate::parser::{parse_curated_activity, ActivityKind};
+use crate::parser::parse_curated_activity;
 
 pub async fn apply_activity_record<S: KeyValueStore>(
     store: &S,
@@ -17,67 +18,6 @@ pub async fn apply_activity_record<S: KeyValueStore>(
         .set(TRANSACTIONS, signature.as_ref(), &record.encode())
         .await?;
     Ok(())
-}
-
-const ACTIVITY_RECORD_LEN: usize = 1 + 32 + 8 + 8 + 8 + 64;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ActivityRecord {
-    pub kind: ActivityKind,
-    pub counterparty: solana_pubkey::Pubkey,
-    pub amount: u64,
-    pub slot: u64,
-    pub block_time: i64,
-    pub signature: [u8; 64],
-}
-
-impl ActivityRecord {
-    pub fn encode(&self) -> Vec<u8> {
-        let mut bytes = Vec::with_capacity(ACTIVITY_RECORD_LEN);
-        bytes.push(self.kind.as_u8());
-        bytes.extend_from_slice(self.counterparty.as_ref());
-        bytes.extend_from_slice(&self.amount.to_le_bytes());
-        bytes.extend_from_slice(&self.slot.to_le_bytes());
-        bytes.extend_from_slice(&self.block_time.to_le_bytes());
-        bytes.extend_from_slice(&self.signature);
-        bytes
-    }
-
-    pub fn decode(data: &[u8]) -> Result<Self, SyncError> {
-        if data.len() != ACTIVITY_RECORD_LEN {
-            return Err(SyncError::InvalidInstruction);
-        }
-
-        let kind = ActivityKind::from_u8(data[0])?;
-        let counterparty = solana_pubkey::Pubkey::try_from(&data[1..33])
-            .map_err(|_| SyncError::InvalidInstruction)?;
-        let amount = u64::from_le_bytes(
-            data[33..41]
-                .try_into()
-                .map_err(|_| SyncError::InvalidInstruction)?,
-        );
-        let slot = u64::from_le_bytes(
-            data[41..49]
-                .try_into()
-                .map_err(|_| SyncError::InvalidInstruction)?,
-        );
-        let block_time = i64::from_le_bytes(
-            data[49..57]
-                .try_into()
-                .map_err(|_| SyncError::InvalidInstruction)?,
-        );
-        let mut signature = [0u8; 64];
-        signature.copy_from_slice(&data[57..121]);
-
-        Ok(Self {
-            kind,
-            counterparty,
-            amount,
-            slot,
-            block_time,
-            signature,
-        })
-    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]

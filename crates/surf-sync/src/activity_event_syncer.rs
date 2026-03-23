@@ -14,11 +14,11 @@ use surf_store::KeyValueStore;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-use crate::activity_syncer::{apply_activity_record, ActivityRecord};
+use crate::activity_syncer::apply_activity_record;
 use crate::checkpoint::{load_event_checkpoint, save_event_checkpoint, EventStreamCheckpoint, ACTIVITY_EVENT_SYNC_KEY};
 use crate::config::EventStreamConfig;
 use crate::error::SyncError;
-use crate::parser::ActivityKind;
+use surf_events::{ActivityKind, ActivityRecord};
 
 #[cfg(not(target_arch = "wasm32"))]
 const FETCH_EXPIRES: Duration = Duration::from_millis(250);

@@ -70,3 +70,21 @@ impl From<surf_client::Error> for SyncError {
         }
     }
 }
+
+impl From<surf_events::InvalidActivityKind> for SyncError {
+    fn from(_: surf_events::InvalidActivityKind) -> Self {
+        SyncError::InvalidInstruction
+    }
+}
+
+impl From<surf_events::InvalidActivityRecord> for SyncError {
+    fn from(_: surf_events::InvalidActivityRecord) -> Self {
+        SyncError::InvalidInstruction
+    }
+}
+
+impl From<surf_events::InvalidFollowRecord> for SyncError {
+    fn from(_: surf_events::InvalidFollowRecord) -> Self {
+        SyncError::InvalidInstruction
+    }
+}

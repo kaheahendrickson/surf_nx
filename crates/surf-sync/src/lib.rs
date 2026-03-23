@@ -33,7 +33,7 @@ pub mod parser;
 pub mod sleep;
 pub mod sync_service;
 
-pub use activity_syncer::{ActivityRecord, ActivitySyncer};
+pub use activity_syncer::ActivitySyncer;
 pub use balance_syncer::BalanceSyncer;
 pub use checkpoint::{SyncCheckpoint, SyncServiceState, SyncState};
 pub use config::{EventStreamConfig, SyncConfig};
@@ -41,11 +41,12 @@ pub use error::SyncError;
 pub use activity_event_syncer::ActivityEventSyncer;
 pub use balance_event_syncer::BalanceEventSyncer;
 pub use follow_event_syncer::FollowEventSyncer;
-pub use follow_syncer::{FollowRecord, FollowSyncer};
+pub use follow_syncer::FollowSyncer;
 pub use name_event_syncer::NameEventSyncer;
-pub use parser::ActivityKind;
 pub use name_syncer::NameSyncer;
 pub use sync_service::SyncService;
+
+pub use surf_events::{ActivityKind, ActivityRecord, FollowRecord};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use sleep::TokioSleep;

@@ -18,7 +18,8 @@ use crate::checkpoint::{
 };
 use crate::config::EventStreamConfig;
 use crate::error::SyncError;
-use crate::follow_syncer::{apply_follow_created, apply_follow_removed, FollowRecord};
+use crate::follow_syncer::{apply_follow_created, apply_follow_removed};
+use surf_events::FollowRecord;
 
 #[cfg(not(target_arch = "wasm32"))]
 const FETCH_EXPIRES: Duration = Duration::from_millis(250);
