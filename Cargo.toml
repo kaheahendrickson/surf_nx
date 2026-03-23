@@ -27,7 +27,7 @@ solana-keypair = "3.0.0"
 solana-message = "3.0.1"
 solana-native-token = "3.0.0"
 solana-program = "3.0.0"
-solana-pubkey = "3.0.0"
+solana-pubkey = { version = "3.0.0", features = ["serde"] }
 solana-sdk-ids = "3.0.0"
 solana-signature = "3.3.0"
 solana-signer = "3.0.0"

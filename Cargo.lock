@@ -4556,6 +4556,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "surf-events"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "solana-pubkey 3.0.0",
+ "solana-signature",
+]
+
+[[package]]
 name = "surf-protocol"
 version = "0.1.0"
 dependencies = [
