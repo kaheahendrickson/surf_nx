@@ -565,7 +565,6 @@ impl WasmBackend for HttpBackend {
     }
 }
 
-
 pub use surf_client::rpc_types;
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -643,7 +642,7 @@ mod wasm_tests {
 #[cfg(test)]
 mod browser_tests {
     use super::*;
-    use surf_client::backend::WasmBackend;
+    // use surf_client::backend::WasmBackend;
 
     const TEST_PUBKEY: &str = env!("SOLANA_KEYPAIR_PUBKEY");
 
