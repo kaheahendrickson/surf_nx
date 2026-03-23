@@ -14,11 +14,13 @@
     },
     "test": {
       "executor": "@monodon/rust:test",
+      "dependsOn": ["^build"],
       "inputs": ["rust", "^rust"],
       "outputs": ["{options.target-dir}"]
     },
     "test-wasm": {
       "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
       "inputs": ["rust", "^rust"],
       "outputs": ["{options.target-dir}"],
       "options": {
