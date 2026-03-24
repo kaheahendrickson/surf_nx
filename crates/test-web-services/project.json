@@ -1,0 +1,28 @@
+{
+  "name": "test-web-services",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/test-web-services",
+  "sourceRoot": "crates/test-web-services/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "dependsOn": ["^build"],
+      "outputs": ["{options.target-dir}"]
+    },
+    "test": {
+      "executor": "@monodon/rust:test",
+      "dependsOn": ["^build"],
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"]
+    },
+    "run": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "cargo run --manifest-path crates/test-web-services/Cargo.toml",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}
