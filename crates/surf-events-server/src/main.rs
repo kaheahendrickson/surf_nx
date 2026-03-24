@@ -2,9 +2,11 @@ use surf_events_server::{ServerConfig, ServerRuntime};
 
 #[tokio::main]
 async fn main() {
-    let rpc_url = std::env::var("SURF_EVENTS_RPC_URL")
+    let rpc_url = std::env::var("SURF_TEST_VALIDATOR_URL")
+        .or_else(|_| std::env::var("SURF_EVENTS_RPC_URL"))
         .unwrap_or_else(|_| "http://127.0.0.1:8899".to_owned());
-    let nats_url = std::env::var("SURF_EVENTS_NATS_URL")
+    let nats_url = std::env::var("SURF_NATS_URL")
+        .or_else(|_| std::env::var("SURF_EVENTS_NATS_URL"))
         .unwrap_or_else(|_| "nats://127.0.0.1:4222".to_owned());
     let stream_name =
         std::env::var("SURF_EVENTS_STREAM").unwrap_or_else(|_| "surf-events".to_owned());
