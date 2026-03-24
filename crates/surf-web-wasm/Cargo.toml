@@ -1,0 +1,22 @@
+[package]
+name = "surf-web-wasm"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+js-sys = "0.3"
+solana-pubkey = "3.0"
+surf-client = { path = "../surf-client" }
+surf-provider-browser = { path = "../surf-provider-browser" }
+surf-protocol = { path = "../surf-protocol" }
+surf-query = { path = "../surf-query" }
+surf-store = { path = "../surf-store" }
+surf-sync = { path = "../surf-sync" }
+wasm-bindgen = { version = "0.2.114", default-features = false, features = ["std", "enable-interning"] }
+wasm-bindgen-futures = "0.4"
+
+[dev-dependencies]
+rtest = { workspace = true }
