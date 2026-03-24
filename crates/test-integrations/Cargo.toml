@@ -1,0 +1,22 @@
+[package]
+name = "test-integrations"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+test-web-services = { path = "../test-web-services" }
+tempfile = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+solana-keypair = { workspace = true }
+solana-pubkey = { workspace = true }
+solana-signer = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "sync"] }
+reqwest = { workspace = true, features = ["json"] }
+dotenvy = { workspace = true }
+
+[dev-dependencies]
+serial_test = { workspace = true }

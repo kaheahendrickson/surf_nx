@@ -5027,6 +5027,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "test-integrations"
+version = "0.1.0"
+dependencies = [
+ "dotenvy",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "solana-keypair",
+ "solana-pubkey 3.0.0",
+ "solana-signer",
+ "tempfile",
+ "test-web-services",
+ "tokio",
+]
+
+[[package]]
 name = "test-nats-server"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,20 @@
+{
+  "name": "test-integrations",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/test-integrations",
+  "sourceRoot": "crates/test-integrations/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "dependsOn": ["^build"],
+      "outputs": ["{options.target-dir}"]
+    },
+    "test": {
+      "executor": "@monodon/rust:test",
+      "dependsOn": ["surf-cli:build", "^build"],
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"]
+    }
+  }
+}
