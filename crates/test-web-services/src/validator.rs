@@ -1,10 +1,7 @@
-use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicU16, Ordering};
 use std::time::Duration;
-
-use tempfile::TempDir;
 
 use crate::config::{registry_program_id, signals_program_id, token_program_id};
 use crate::error::TestWebServicesError;
@@ -45,8 +42,6 @@ fn find_validator_binary() -> PathBuf {
 #[derive(Debug)]
 pub struct RpcValidatorGuard {
     child: Child,
-    _temp_dir: TempDir,
-    log_path: PathBuf,
     port: u16,
     url: String,
 }
@@ -84,11 +79,6 @@ impl RpcValidatorGuard {
         registry_path: &Path,
         signals_path: &Path,
     ) -> Result<Self, TestWebServicesError> {
-        let temp_dir = tempfile::tempdir()?;
-        let log_path = temp_dir.path().join("validator.log");
-        let log_file = File::create(&log_path)?;
-        let stderr_file = log_file.try_clone()?;
-
         let token_id = token_program_id();
         let registry_id = registry_program_id();
         let signals_id = signals_program_id();
@@ -102,8 +92,8 @@ impl RpcValidatorGuard {
                 "--program", &format!("{}={}", registry_id, registry_path.display()),
                 "--program", &format!("{}={}", signals_id, signals_path.display()),
             ])
-            .stdout(Stdio::from(log_file))
-            .stderr(Stdio::from(stderr_file))
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
             .spawn()
             .map_err(|source| TestWebServicesError::Spawn {
                 service: "test-rpc-validator".to_string(),
@@ -114,8 +104,6 @@ impl RpcValidatorGuard {
 
         Ok(Self {
             child,
-            _temp_dir: temp_dir,
-            log_path,
             port,
             url,
         })
@@ -132,7 +120,7 @@ impl RpcValidatorGuard {
                 return Err(TestWebServicesError::ExitedEarly {
                     service: "test-rpc-validator".to_string(),
                     status,
-                    log_path: self.log_path.clone(),
+                    log_path: PathBuf::from("<stdout>"),
                 });
             }
 
@@ -141,7 +129,7 @@ impl RpcValidatorGuard {
                     service: "test-rpc-validator".to_string(),
                     timeout: READY_TIMEOUT,
                     last_error,
-                    log_path: self.log_path.clone(),
+                    log_path: PathBuf::from("<stdout>"),
                 });
             }
 
@@ -181,10 +169,6 @@ impl RpcValidatorGuard {
 
     pub fn port(&self) -> u16 {
         self.port
-    }
-
-    pub fn log_path(&self) -> &Path {
-        &self.log_path
     }
 }
 

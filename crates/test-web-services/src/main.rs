@@ -46,18 +46,13 @@ async fn main() {
     println!("  RPC URL: {}", ctx.rpc_url());
     println!("  NATS URL: {}", ctx.nats_url());
     println!("");
-    println!("Program IDs:");
-    println!("  Token: {}", test_web_services::token_program_id());
-    println!("  Registry: {}", test_web_services::registry_program_id());
-    println!("  Signals: {}", test_web_services::signals_program_id());
-    println!("  Tracked: {}", test_web_services::tracked_address());
-    println!("");
-    println!("Log files:");
-    println!("  NATS: {}", ctx.nats_log_path().display());
-    println!("  Validator: {}", ctx.validator_log_path().display());
-    println!("  Events: {}", ctx.events_log_path().display());
-    println!("");
-    println!("Press Ctrl+C to stop...");
+println!("Program IDs:");
+println!("  Token: {}", test_web_services::token_program_id());
+println!("  Registry: {}", test_web_services::registry_program_id());
+println!("  Signals: {}", test_web_services::signals_program_id());
+println!("  Tracked: {}", test_web_services::tracked_address());
+println!("");
+println!("Press Ctrl+C to stop...");
 
     wait_for_shutdown().await;
     drop(ctx);

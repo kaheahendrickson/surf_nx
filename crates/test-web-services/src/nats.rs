@@ -1,10 +1,7 @@
-use std::fs::File;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicU16, Ordering};
 use std::time::Duration;
-
-use tempfile::TempDir;
 
 use crate::error::TestWebServicesError;
 
@@ -19,8 +16,6 @@ static NEXT_PORT: AtomicU16 = AtomicU16::new(INITIAL_PORT);
 #[derive(Debug)]
 pub struct NatsServerGuard {
     child: Child,
-    _temp_dir: TempDir,
-    log_path: PathBuf,
     port: u16,
     url: String,
 }
@@ -49,15 +44,10 @@ impl NatsServerGuard {
     }
 
     fn spawn(port: u16) -> Result<Self, TestWebServicesError> {
-        let temp_dir = tempfile::tempdir()?;
-        let log_path = temp_dir.path().join("nats-server.log");
-        let log_file = File::create(&log_path)?;
-        let stderr_file = log_file.try_clone()?;
-        
         let child = Command::new(NATS_SERVER_BIN)
             .args(["-js", "-a", "127.0.0.1", "-p", &port.to_string()])
-            .stdout(Stdio::from(log_file))
-            .stderr(Stdio::from(stderr_file))
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
             .spawn()
             .map_err(|source| TestWebServicesError::Spawn {
                 service: "nats-server".to_string(),
@@ -68,8 +58,6 @@ impl NatsServerGuard {
 
         Ok(Self {
             child,
-            _temp_dir: temp_dir,
-            log_path,
             port,
             url,
         })
@@ -84,7 +72,7 @@ impl NatsServerGuard {
                 return Err(TestWebServicesError::ExitedEarly {
                     service: "nats-server".to_string(),
                     status,
-                    log_path: self.log_path.clone(),
+                    log_path: PathBuf::from("<stdout>"),
                 });
             }
 
@@ -93,7 +81,7 @@ impl NatsServerGuard {
                     service: "nats-server".to_string(),
                     timeout: READY_TIMEOUT,
                     last_error,
-                    log_path: self.log_path.clone(),
+                    log_path: PathBuf::from("<stdout>"),
                 });
             }
 
@@ -117,10 +105,6 @@ impl NatsServerGuard {
 
     pub fn port(&self) -> u16 {
         self.port
-    }
-
-    pub fn log_path(&self) -> &Path {
-        &self.log_path
     }
 }
 

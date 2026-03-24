@@ -1,9 +1,6 @@
-use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::time::Duration;
-
-use tempfile::TempDir;
 
 use crate::config::{registry_program_id, signals_program_id, token_program_id, tracked_address};
 use crate::error::TestWebServicesError;
@@ -37,8 +34,6 @@ fn find_events_binary() -> PathBuf {
 #[derive(Debug)]
 pub struct EventsServerGuard {
     child: Child,
-    _temp_dir: TempDir,
-    log_path: PathBuf,
 }
 
 impl EventsServerGuard {
@@ -47,11 +42,6 @@ impl EventsServerGuard {
         rpc_url: &str,
         checkpoint_path: &Path,
     ) -> Result<Self, TestWebServicesError> {
-        let temp_dir = tempfile::tempdir()?;
-        let log_path = temp_dir.path().join("events-server.log");
-        let log_file = File::create(&log_path)?;
-        let stderr_file = log_file.try_clone()?;
-
         let token_id = token_program_id();
         let registry_id = registry_program_id();
         let signals_id = signals_program_id();
@@ -60,27 +50,23 @@ impl EventsServerGuard {
         let events_bin = find_events_binary();
 
         let child = Command::new(events_bin)
-            .env("SURF_EVENTS_RPC_URL", rpc_url)
-            .env("SURF_EVENTS_NATS_URL", nats_url)
+            .env("SURF_TEST_VALIDATOR_URL", rpc_url)
+            .env("SURF_NATS_URL", nats_url)
             .env("SURF_EVENTS_STREAM", "surf-events")
             .env("SURF_EVENTS_TRACKED_ADDRESS", tracked.to_string())
             .env("SURF_TOKEN_PROGRAM", token_id.to_string())
             .env("SURF_REGISTRY_PROGRAM", registry_id.to_string())
             .env("SURF_SIGNALS_PROGRAM", signals_id.to_string())
             .env("SURF_EVENTS_CHECKPOINT_PATH", checkpoint_path.to_string_lossy().to_string())
-            .stdout(Stdio::from(log_file))
-            .stderr(Stdio::from(stderr_file))
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
             .spawn()
             .map_err(|source| TestWebServicesError::Spawn {
                 service: "surf-events-server".to_string(),
                 source,
             })?;
 
-        let guard = Self {
-            child,
-            _temp_dir: temp_dir,
-            log_path,
-        };
+        let guard = Self { child };
 
         guard.wait_ready().await
     }
@@ -92,15 +78,11 @@ impl EventsServerGuard {
             return Err(TestWebServicesError::ExitedEarly {
                 service: "surf-events-server".to_string(),
                 status,
-                log_path: self.log_path.clone(),
+                log_path: PathBuf::from("<stdout>"),
             });
         }
 
         Ok(self)
-    }
-
-    pub fn log_path(&self) -> &Path {
-        &self.log_path
     }
 }
 

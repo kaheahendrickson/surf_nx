@@ -67,16 +67,4 @@ impl TestWebServicesContext {
     pub fn rpc_port(&self) -> u16 {
         self.validator.port()
     }
-
-    pub fn nats_log_path(&self) -> &std::path::Path {
-        self.nats.log_path()
-    }
-
-    pub fn validator_log_path(&self) -> &std::path::Path {
-        self.validator.log_path()
-    }
-
-    pub fn events_log_path(&self) -> &std::path::Path {
-        self.events.log_path()
-    }
 }
