@@ -22,7 +22,7 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
-    let args = Args::parse();
+    dotenvy::dotenv().ok();let args = Args::parse();
 
     println!("Starting test-web-services...");
 

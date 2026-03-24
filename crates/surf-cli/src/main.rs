@@ -322,7 +322,7 @@ impl FileConfig {
 
 #[tokio::main]
 async fn main() {
-    let cli = Cli::parse();
+    dotenvy::dotenv().ok();let cli = Cli::parse();
 
     if let Err(err) = run(cli).await {
         eprintln!("Error: {err}");

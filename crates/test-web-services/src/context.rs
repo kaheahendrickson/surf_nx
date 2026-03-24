@@ -24,15 +24,15 @@ impl TestWebServicesContext {
         let temp_dir = tempfile::tempdir()?;
         let checkpoint_path = temp_dir.path().join("checkpoint.json");
 
-        let nats_port = if config.nats_port != 4222 {
+        let nats_port = if config.nats_port == 0 {
+            None
+        } else {
             Some(config.nats_port)
-        } else {
-            None
         };
-        let rpc_port = if config.rpc_port != 8899 {
-            Some(config.rpc_port)
-        } else {
+        let rpc_port = if config.rpc_port == 0 {
             None
+        } else {
+            Some(config.rpc_port)
         };
 
         let nats = NatsServerGuard::start(nats_port).await?;
