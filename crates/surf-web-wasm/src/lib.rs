@@ -10,7 +10,9 @@ use solana_pubkey::Pubkey;
 #[cfg(target_arch = "wasm32")]
 use surf_client::QueryClient;
 #[cfg(target_arch = "wasm32")]
-use surf_provider_browser::{BrowserBackend, HttpBackendConfig};
+use surf_client_backend_http::HttpBackend;
+#[cfg(target_arch = "wasm32")]
+use surf_client_http_config::HttpBackendConfig;
 #[cfg(target_arch = "wasm32")]
 use surf_protocol::decode_token_balance;
 #[cfg(target_arch = "wasm32")]
@@ -28,8 +30,8 @@ fn parse_pubkey(value: &str, label: &str) -> Result<Pubkey, JsValue> {
 }
 
 #[cfg(target_arch = "wasm32")]
-fn backend(url: &str) -> BrowserBackend {
-    BrowserBackend::from_config(HttpBackendConfig::new(url))
+fn backend(url: &str) -> HttpBackend {
+    HttpBackend::from_config(HttpBackendConfig::new(url))
 }
 
 #[cfg(target_arch = "wasm32")]

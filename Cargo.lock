@@ -4926,6 +4926,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "surf-web-wasm"
+version = "0.1.0"
+dependencies = [
+ "js-sys",
+ "solana-pubkey 3.0.0",
+ "surf-client",
+ "surf-client-backend-http",
+ "surf-client-http-config",
+ "surf-protocol",
+ "surf-query",
+ "surf-store",
+ "surf-sync",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-bindgen-test",
+]
+
+[[package]]
 name = "syn"
 version = "1.0.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -10,7 +10,8 @@ crate-type = ["cdylib", "rlib"]
 js-sys = "0.3"
 solana-pubkey = "3.0"
 surf-client = { path = "../surf-client" }
-surf-provider-browser = { path = "../surf-provider-browser" }
+surf-client-backend-http = { path = "../surf-client-backend-http" }
+surf-client-http-config = { path = "../surf-client-http-config" }
 surf-protocol = { path = "../surf-protocol" }
 surf-query = { path = "../surf-query" }
 surf-store = { path = "../surf-store" }
@@ -19,4 +20,4 @@ wasm-bindgen = { version = "0.2.114", default-features = false, features = ["std
 wasm-bindgen-futures = "0.4"
 
 [dev-dependencies]
-rtest = { workspace = true }
+wasm-bindgen-test = { workspace = true }

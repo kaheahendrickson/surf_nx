@@ -1,0 +1,34 @@
+{
+  "name": "surf-web-wasm",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "root": "crates/surf-web-wasm",
+  "sourceRoot": "crates/surf-web-wasm/src",
+  "targets": {
+    "build": {
+      "executor": "@monodon/rust:build",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "lib": true
+      }
+    },
+    "test-node": {
+      "executor": "nx:run-commands",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "command": "wasm-pack test --node",
+        "cwd": "{workspaceRoot}/crates/surf-web-wasm"
+      }
+    },
+    "test-browser": {
+      "executor": "nx:run-commands",
+      "inputs": ["rust", "^rust"],
+      "outputs": ["{options.target-dir}"],
+      "options": {
+        "command": "wasm-pack test --headless --chrome",
+        "cwd": "{workspaceRoot}/crates/surf-web-wasm"
+      }
+    }
+  }
+}
