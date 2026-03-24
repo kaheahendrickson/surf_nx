@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+async-nats = { workspace = true }
 clap = { workspace = true }
 dotenvy = { workspace = true }
+futures = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 solana-keypair = { workspace = true }
@@ -17,8 +19,9 @@ solana-system-interface = { workspace = true, features = ["bincode"] }
 surf-client = { workspace = true }
 surf-client-http-config = { workspace = true }
 surf-client-backend-http = { workspace = true }
+surf-events = { workspace = true }
 surf-protocol = { workspace = true }
-tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "signal"] }
 
 [dev-dependencies]
 reqwest = { workspace = true, features = ["json"] }

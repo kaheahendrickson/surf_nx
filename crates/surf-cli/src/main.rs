@@ -1,3 +1,5 @@
+mod events;
+
 use std::env;
 use std::error::Error as StdError;
 use std::fmt;
@@ -21,6 +23,7 @@ const ENV_TOKEN_PROGRAM_ID: &str = "SURF_TOKEN_PROGRAM_ID";
 const ENV_REGISTRY_PROGRAM_ID: &str = "SURF_REGISTRY_PROGRAM_ID";
 const ENV_SIGNALS_PROGRAM_ID: &str = "SURF_SIGNALS_PROGRAM_ID";
 const ENV_RPC_URL: &str = "SURF_TEST_VALIDATOR_URL";
+const ENV_NATS_URL: &str = "SURF_NATS_URL";
 const ENV_KEYPAIR: &str = "SURF_KEYPAIR";
 const DEFAULT_CONFIG_PATH: &str = "~/.config/surf-cli/config.json";
 const DEFAULT_KEYPAIR: &str = "~/.config/solana/id.json";
@@ -48,6 +51,8 @@ struct GlobalArgs {
     #[arg(long, global = true)]
     signals_program: Option<String>,
     #[arg(long, global = true)]
+    nats_url: Option<String>,
+    #[arg(long, global = true)]
     json: bool,
 }
 
@@ -65,6 +70,7 @@ enum Command {
     Sol(SolCommand),
     Names(NamesCommand),
     Signals(SignalsCommand),
+    Events(EventsCommand),
 }
 
 #[derive(Args, Debug)]
@@ -215,6 +221,42 @@ enum NamesSubcommand {
     },
 }
 
+#[derive(Args, Debug)]
+struct EventsCommand {
+    #[command(subcommand)]
+    command: EventsSubcommand,
+}
+
+#[derive(Subcommand, Debug)]
+enum EventsSubcommand {
+    Subscribe {
+        #[arg(long)]
+        pubkey: Option<String>,
+        #[arg(long)]
+        subject: Option<String>,
+        #[arg(long)]
+        event_type: Option<String>,
+        #[arg(long, default_value = "surf-events")]
+        stream: String,
+    },
+    Fetch {
+        #[arg(long)]
+        pubkey: Option<String>,
+        #[arg(long)]
+        subject: Option<String>,
+        #[arg(long)]
+        event_type: Option<String>,
+        #[arg(long, default_value = "surf-events")]
+        stream: String,
+        #[arg(long, default_value = "100")]
+        limit: usize,
+    },
+    Subjects {
+        #[arg(long)]
+        pubkey: String,
+    },
+}
+
 #[derive(Debug)]
 struct CliError(String);
 
@@ -236,6 +278,7 @@ struct AppConfig {
     registry_program: Pubkey,
     signals_program: Pubkey,
     default_keypair: PathBuf,
+    nats_url: Option<String>,
     json: bool,
 }
 
@@ -283,6 +326,11 @@ impl AppConfig {
                 Some(ENV_KEYPAIR),
                 Some(DEFAULT_KEYPAIR.to_string()),
             )?,
+            nats_url: resolve_optional_string(
+                args.nats_url.as_deref(),
+                file_config.nats_url.as_deref(),
+                Some(ENV_NATS_URL),
+            ),
             json: args.json,
         })
     }
@@ -295,6 +343,7 @@ struct FileConfig {
     registry_program: Option<String>,
     signals_program: Option<String>,
     keypair: Option<String>,
+    nats_url: Option<String>,
 }
 
 impl FileConfig {
@@ -340,6 +389,7 @@ async fn run(cli: Cli) -> Result<()> {
         Command::Sol(sol) => run_sol(&config, sol).await,
         Command::Names(names) => run_names(&config, names).await,
         Command::Signals(signals) => run_signals(&config, signals).await,
+        Command::Events(events) => run_events(&config, events).await,
     }
 }
 
@@ -891,6 +941,64 @@ async fn lookup_name_owner(config: &AppConfig, name: &str, sender: Pubkey) -> Re
     }
 }
 
+async fn run_events(config: &AppConfig, command: EventsCommand) -> Result<()> {
+    use crate::events::EventReader;
+
+    match command.command {
+        EventsSubcommand::Subscribe {
+            pubkey,
+            subject,
+            event_type,
+            stream,
+        } => {
+            let subject = resolve_subject(pubkey.as_deref(), subject, event_type.as_deref())?;
+            let reader = EventReader::connect(config.nats_url.as_deref())
+                .await?
+                .with_stream_name(stream);
+            reader.subscribe(&subject, config.json).await?;
+        }
+        EventsSubcommand::Fetch {
+            pubkey,
+            subject,
+            event_type,
+            stream,
+            limit,
+        } => {
+            let subject = resolve_subject(pubkey.as_deref(), subject, event_type.as_deref())?;
+            let reader = EventReader::connect(config.nats_url.as_deref())
+                .await?
+                .with_stream_name(stream);
+            reader.fetch(&subject, limit, config.json).await?;
+        }
+        EventsSubcommand::Subjects { pubkey } => {
+            let pubkey = parse_pubkey(&pubkey, "pubkey")?;
+            let reader = EventReader::connect(config.nats_url.as_deref()).await?;
+            reader.list_subjects(&pubkey, config.json).await;
+        }
+    }
+
+    Ok(())
+}
+
+fn resolve_subject(
+    pubkey: Option<&str>,
+    subject: Option<String>,
+    event_type: Option<&str>,
+) -> Result<String> {
+    use crate::events::build_subject;
+
+    if let Some(subject) = subject {
+        return Ok(subject);
+    }
+
+    let pubkey = match pubkey {
+        Some(p) => Some(parse_pubkey(p, "pubkey")?),
+        None => None,
+    };
+
+    build_subject(pubkey.as_ref(), event_type)
+}
+
 fn parse_pubkey(value: &str, label: &str) -> Result<Pubkey> {
     value
         .parse()
@@ -955,6 +1063,28 @@ fn resolve_string_option(
         "missing {label}; provide {}",
         sources.join(", ")
     ))))
+}
+
+fn resolve_optional_string(
+    flag_value: Option<&str>,
+    file_value: Option<&str>,
+    env_key: Option<&str>,
+) -> Option<String> {
+    if let Some(value) = flag_value {
+        return Some(value.to_string());
+    }
+
+    if let Some(value) = file_value {
+        return Some(value.to_string());
+    }
+
+    if let Some(env_key) = env_key {
+        if let Ok(value) = env::var(env_key) {
+            return Some(value);
+        }
+    }
+
+    None
 }
 
 fn load_local_signer(config: &AppConfig, args: &KeypairArgs) -> Result<LocalKeypairSigner> {
