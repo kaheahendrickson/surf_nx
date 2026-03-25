@@ -1,26 +1,62 @@
 use surf_client::{Backend, ParsedTransaction, ProgramAccountsFilter, SignaturesForAddressOptions};
-use surf_events::{EventEnvelope, EventPayload, NameRegistered};
+use surf_events::{ActivityKind, ActivityRecorded, EventEnvelope, EventPayload, NameRegistered};
 use surf_protocol::{decode_name_record, derive_name_record_pda, NameRecord};
 
 use crate::checkpoint::SignatureCursor;
 use crate::error::SyncError;
 use crate::publisher::{EventPublisher, PublishedEvent};
 
-pub struct NameSyncService<P> { publisher: P, registry_program: solana_pubkey::Pubkey }
+pub struct NameSyncService<P> {
+    publisher: P,
+    registry_program: solana_pubkey::Pubkey,
+}
 
 impl<P: EventPublisher> NameSyncService<P> {
-    pub fn new(publisher: P, registry_program: solana_pubkey::Pubkey) -> Self { Self { publisher, registry_program } }
+    pub fn new(publisher: P, registry_program: solana_pubkey::Pubkey) -> Self {
+        Self {
+            publisher,
+            registry_program,
+        }
+    }
 
     pub async fn bootstrap<B: Backend>(&self, backend: &B) -> Result<Vec<PublishedEvent>, SyncError> {
         let accounts = backend.get_program_accounts(&self.registry_program, Some(ProgramAccountsFilter { data_size: Some(NameRecord::LEN) })).await?;
         let mut published = Vec::new();
         for account_info in accounts {
-            let Some(record) = decode_name_record(&account_info.account.data) else { continue; };
-            let name = std::str::from_utf8(&record.name[..record.len as usize]).map_err(|_| SyncError::InvalidSignalInstruction)?.to_owned();
+            let Some(record) = decode_name_record(&account_info.account.data) else { continue };
+            let name = std::str::from_utf8(&record.name[..record.len as usize])
+                .map_err(|_| SyncError::InvalidSignalInstruction)?
+                .to_owned();
             let (expected_pda, _) = derive_name_record_pda(name.as_bytes(), &self.registry_program);
-            if expected_pda != account_info.pubkey { continue; }
-            let envelope = EventEnvelope { schema_version: 1, event_id: format!("name.registered:bootstrap:{name}"), slot: 0, signature: "bootstrap".to_owned(), instruction_index: 0, observed_at: 0, payload: EventPayload::NameRegistered(NameRegistered { name, owner: record.owner, record: account_info.account.data.clone() }) };
-            published.push(self.publisher.publish(&envelope).await?);
+            if expected_pda != account_info.pubkey {
+                continue;
+            }
+            let name_event = EventPayload::NameRegistered(NameRegistered {
+                name: name.clone(),
+                owner: record.owner,
+                record: account_info.account.data.clone(),
+            });
+            let activity_event = EventPayload::ActivityRecorded(ActivityRecorded {
+                owner: record.owner,
+                kind: ActivityKind::NameRegistered.as_u8(),
+                counterparty: record.owner,
+                amount: 0,
+            });
+            let signature = solana_signature::Signature::from([0u8; 64]);
+            published.push(self.publisher.publish(&EventEnvelope::new(
+                name_event,
+                0,
+                &signature,
+                0,
+                0,
+            )).await?);
+            published.push(self.publisher.publish(&EventEnvelope::new(
+                activity_event,
+                0,
+                &signature,
+                1,
+                0,
+            )).await?);
         }
         Ok(published)
     }
@@ -60,8 +96,33 @@ impl<P: EventPublisher> NameSyncService<P> {
             let (pda, _) = derive_name_record_pda(name.as_bytes(), &self.registry_program);
             let Some(account) = backend.get_account(&pda).await? else { continue; };
             let Some(record) = decode_name_record(&account.data) else { continue; };
-            let envelope = EventEnvelope::new(EventPayload::NameRegistered(NameRegistered { name, owner: record.owner, record: account.data.clone() }), tx.slot, tx.signatures.first().ok_or(SyncError::InvalidSignalInstruction)?, instruction_index as u8, tx.block_time.unwrap_or(-1));
-            published.push(self.publisher.publish(&envelope).await?);
+
+            let name_event = EventPayload::NameRegistered(NameRegistered {
+                name: name.clone(),
+                owner: record.owner,
+                record: account.data.clone(),
+            });
+            let activity_event = EventPayload::ActivityRecorded(ActivityRecorded {
+                owner: record.owner,
+                kind: ActivityKind::NameRegistered.as_u8(),
+                counterparty: record.owner,
+                amount: 0,
+            });
+
+            published.push(self.publisher.publish(&EventEnvelope::new(
+                name_event,
+                tx.slot,
+                tx.signatures.first().ok_or(SyncError::InvalidSignalInstruction)?,
+                instruction_index as u8,
+                tx.block_time.unwrap_or(-1),
+            )).await?);
+                published.push(self.publisher.publish(&EventEnvelope::new(
+                activity_event,
+                tx.slot,
+                tx.signatures.first().ok_or(SyncError::InvalidSignalInstruction)?,
+                instruction_index as u8 + 1,
+                tx.block_time.unwrap_or(-1),
+            )).await?);
         }
         Ok(published)
     }

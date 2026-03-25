@@ -50,10 +50,9 @@ pub struct BalanceSnapshot {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ServerCheckpointState {
     pub bootstrapped: bool,
-    pub follow: SignatureCursor,
     pub names: SignatureCursor,
     pub tokens: SignatureCursor,
-    pub activity: SignatureCursor,
+    pub signals: SignatureCursor,
 }
 
 pub fn load_checkpoint(path: &Path) -> Result<ServerCheckpointState, ServerError> {

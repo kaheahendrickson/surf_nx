@@ -1,12 +1,10 @@
 use async_nats::jetstream::stream;
-use surf_client::{Backend, SignaturesForAddressOptions};
 use surf_client_backend_http::HttpBackend;
 
 use crate::checkpoint::{load_checkpoint, save_checkpoint, ServerCheckpointState};
 use crate::config::ServerConfig;
 use crate::error::ServerError;
 use crate::publisher::JetStreamPublisher;
-use crate::sync::activity::ActivitySyncService;
 use crate::sync::follows::FollowSyncService;
 use crate::sync::names::NameSyncService;
 use crate::sync::tokens::TokenSyncService;
@@ -14,10 +12,9 @@ use crate::sync::tokens::TokenSyncService;
 pub struct ServerRuntime {
     config: ServerConfig,
     backend: HttpBackend,
-    follow_sync: FollowSyncService<JetStreamPublisher>,
     name_sync: NameSyncService<JetStreamPublisher>,
     token_sync: TokenSyncService<JetStreamPublisher>,
-    activity_sync: Option<ActivitySyncService<JetStreamPublisher>>,
+    signals_sync: FollowSyncService<JetStreamPublisher>,
     checkpoint: ServerCheckpointState,
 }
 
@@ -27,41 +24,26 @@ impl ServerRuntime {
         ensure_stream(&publisher, &config).await?;
 
         let backend = HttpBackend::new(&config.rpc_url);
-        let follow_sync = FollowSyncService::new(publisher.clone(), config.signals_program);
         let name_sync = NameSyncService::new(publisher.clone(), config.registry_program);
         let token_sync = TokenSyncService::new(publisher.clone(), config.token_program);
-        let activity_sync = config.tracked_address.map(|tracked_address| {
-            ActivitySyncService::new(
-                publisher.clone(),
-                tracked_address,
-                config.token_program,
-                config.registry_program,
-                config.signals_program,
-            )
-        });
+        let signals_sync = FollowSyncService::new(publisher.clone(), config.signals_program);
 
         let checkpoint = load_checkpoint(&config.checkpoint_path)?;
 
         Ok(Self {
             config,
             backend,
-            follow_sync,
             name_sync,
             token_sync,
-            activity_sync,
+            signals_sync,
             checkpoint,
         })
     }
 
     pub async fn run(mut self) -> Result<(), ServerError> {
-        let tracked_info = self
-            .config
-            .tracked_address
-            .map(|addr| format!(" and {}", addr))
-            .unwrap_or_default();
         println!(
-            "surf-events-server polling {} for token program {}{} and publishing to {}",
-            self.config.rpc_url, self.config.token_program, tracked_info, self.config.nats_url
+            "surf-events-server polling {} for token program {}, signals program {} and publishing to {}",
+            self.config.rpc_url, self.config.token_program, self.config.signals_program, self.config.nats_url
         );
 
         loop {
@@ -80,41 +62,8 @@ impl ServerRuntime {
         self.checkpoint.names = names;
         let (_, tokens) = self.token_sync.sync_recent_since(&self.backend, self.config.signature_batch_limit, &self.checkpoint.tokens).await.map_err(|err| ServerError::Sync(err.to_string()))?;
         self.checkpoint.tokens = tokens;
-        if let Some(activity_sync) = &self.activity_sync {
-            if let Some(tracked_address) = self.config.tracked_address {
-                let (_, activity) = activity_sync.sync_recent_since(&self.backend, self.config.transaction_history_limit, &self.checkpoint.activity).await.map_err(|err| ServerError::Sync(err.to_string()))?;
-                self.checkpoint.activity = activity;
-                let signatures = self
-                    .backend
-                    .get_signatures_for_address(
-                        &tracked_address,
-                        Some(SignaturesForAddressOptions {
-                            limit: Some(self.config.signature_batch_limit),
-                            ..Default::default()
-                        }),
-                    )
-                    .await
-                    .map_err(|err| ServerError::Rpc(err.to_string()))?;
-
-                let mut fresh = signatures
-                    .into_iter()
-                    .filter(|entry| self.checkpoint.follow.should_process(&entry.signature, entry.slot))
-                    .collect::<Vec<_>>();
-                fresh.sort_by_key(|entry| entry.slot);
-
-                let mut processed = Vec::new();
-
-                for entry in fresh {
-                    self.follow_sync
-                        .sync_signature(&self.backend, &entry.signature)
-                        .await
-                        .map_err(|err| ServerError::Sync(err.to_string()))?;
-                    processed.push((entry.signature, entry.slot));
-                }
-
-                self.checkpoint.follow.advance(processed);
-            }
-        }
+        let (_, signals) = self.signals_sync.sync_recent_since(&self.backend, self.config.signature_batch_limit, &self.checkpoint.signals).await.map_err(|err| ServerError::Sync(err.to_string()))?;
+        self.checkpoint.signals = signals;
         save_checkpoint(&self.config.checkpoint_path, &self.checkpoint)?;
 
         Ok(())

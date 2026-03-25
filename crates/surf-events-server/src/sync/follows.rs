@@ -1,9 +1,10 @@
 use solana_pubkey::Pubkey;
 use solana_signature::Signature;
-use surf_client::{Backend, ParsedTransaction};
-use surf_events::{EventEnvelope, EventPayload, FollowCreated, FollowRemoved};
+use surf_client::{Backend, ParsedTransaction, SignaturesForAddressOptions};
+use surf_events::{ActivityKind, ActivityRecorded, EventEnvelope, EventPayload, FollowCreated, FollowRemoved};
 use surf_protocol::SignalKind;
 
+use crate::checkpoint::SignatureCursor;
 use crate::error::SyncError;
 use crate::publisher::{EventPublisher, PublishedEvent};
 
@@ -21,6 +22,50 @@ where
             publisher,
             signals_program,
         }
+    }
+
+    pub async fn sync_recent<B: Backend>(
+        &self,
+        backend: &B,
+        limit: usize,
+    ) -> Result<Vec<PublishedEvent>, SyncError> {
+        Ok(self
+            .sync_recent_since(backend, limit, &SignatureCursor::default())
+            .await?
+            .0)
+    }
+
+    pub async fn sync_recent_since<B: Backend>(
+        &self,
+        backend: &B,
+        limit: usize,
+        checkpoint: &SignatureCursor,
+    ) -> Result<(Vec<PublishedEvent>, SignatureCursor), SyncError> {
+        let signatures = backend
+            .get_signatures_for_address(
+                &self.signals_program,
+                Some(SignaturesForAddressOptions {
+                    limit: Some(limit),
+                    ..Default::default()
+                }),
+            )
+            .await?;
+        let mut published = Vec::new();
+        let mut next = checkpoint.clone();
+        let mut processed = Vec::new();
+
+        for sig in signatures.into_iter().rev() {
+            if !checkpoint.should_process(&sig.signature, sig.slot) {
+                continue;
+            }
+            if let Some(tx) = backend.get_transaction(&sig.signature).await? {
+                published.extend(self.publish_transaction(&tx).await?);
+            }
+            processed.push((sig.signature, sig.slot));
+        }
+
+        next.advance(processed);
+        Ok((published, next))
     }
 
     pub async fn publish_transaction(
@@ -81,27 +126,29 @@ impl FollowEventMapper {
                 continue;
             }
 
-            let Some(payload) = parse_follow_event_payload(transaction, instruction)? else {
+            let Some(payloads) = parse_follow_event_payloads(transaction, instruction)? else {
                 continue;
             };
 
-            events.push(EventEnvelope::new(
-                payload,
-                transaction.slot,
-                signature,
-                instruction_index as u8,
-                observed_at,
-            ));
+            for payload in payloads {
+                events.push(EventEnvelope::new(
+                    payload,
+                    transaction.slot,
+                    signature,
+                    instruction_index as u8,
+                    observed_at,
+                ));
+            }
         }
 
         Ok(events)
     }
 }
 
-fn parse_follow_event_payload(
+fn parse_follow_event_payloads(
     transaction: &ParsedTransaction,
     instruction: &surf_client::InstructionInfo,
-) -> Result<Option<EventPayload>, SyncError> {
+) -> Result<Option<Vec<EventPayload>>, SyncError> {
     if instruction.data.len() < 34
         || instruction.data[0] != surf_protocol::instruction::signals::SIGNAL_DISCRIMINATOR
     {
@@ -125,11 +172,25 @@ fn parse_follow_event_payload(
         _ => return Err(SyncError::InvalidSignalInstruction),
     };
 
-    let payload = match kind {
-        SignalKind::Follow => EventPayload::FollowCreated(FollowCreated { follower, target }),
-        SignalKind::Unfollow => EventPayload::FollowRemoved(FollowRemoved { follower, target }),
+    let (follow_payload, activity_kind) = match kind {
+        SignalKind::Follow => (
+            EventPayload::FollowCreated(FollowCreated { follower, target }),
+            ActivityKind::Followed,
+        ),
+        SignalKind::Unfollow => (
+            EventPayload::FollowRemoved(FollowRemoved { follower, target }),
+            ActivityKind::Unfollowed,
+        ),
     };
-    Ok(Some(payload))
+
+    let activity_payload = EventPayload::ActivityRecorded(ActivityRecorded {
+        owner: follower,
+        kind: activity_kind.as_u8(),
+        counterparty: target,
+        amount: 0,
+    });
+
+    Ok(Some(vec![follow_payload, activity_payload]))
 }
 
 #[cfg(test)]
@@ -208,13 +269,21 @@ mod tests {
 
         let events = mapper.map_transaction(&transaction).unwrap();
 
-        assert_eq!(events.len(), 1);
+        assert_eq!(events.len(), 2);
         match &events[0].payload {
             EventPayload::FollowCreated(payload) => {
                 assert_eq!(payload.follower, transaction.message.account_keys[1]);
                 assert_eq!(payload.target, transaction.message.account_keys[2]);
             }
-            other => panic!("unexpected payload: {other:?}"),
+            other => panic!("unexpected first payload: {other:?}"),
+        }
+        match &events[1].payload {
+            EventPayload::ActivityRecorded(payload) => {
+                assert_eq!(payload.kind, ActivityKind::Followed.as_u8());
+                assert_eq!(payload.owner, transaction.message.account_keys[1]);
+                assert_eq!(payload.counterparty, transaction.message.account_keys[2]);
+            }
+            other => panic!("unexpected second payload: {other:?}"),
         }
     }
 
@@ -226,13 +295,21 @@ mod tests {
 
         let events = mapper.map_transaction(&transaction).unwrap();
 
-        assert_eq!(events.len(), 1);
+        assert_eq!(events.len(), 2);
         match &events[0].payload {
             EventPayload::FollowRemoved(payload) => {
                 assert_eq!(payload.follower, transaction.message.account_keys[1]);
                 assert_eq!(payload.target, transaction.message.account_keys[2]);
             }
-            other => panic!("unexpected payload: {other:?}"),
+            other => panic!("unexpected first payload: {other:?}"),
+        }
+        match &events[1].payload {
+            EventPayload::ActivityRecorded(payload) => {
+                assert_eq!(payload.kind, ActivityKind::Unfollowed.as_u8());
+                assert_eq!(payload.owner, transaction.message.account_keys[1]);
+                assert_eq!(payload.counterparty, transaction.message.account_keys[2]);
+            }
+            other => panic!("unexpected second payload: {other:?}"),
         }
     }
 
@@ -245,8 +322,8 @@ mod tests {
 
         let published = service.publish_transaction(&transaction).await.unwrap();
 
-        assert_eq!(published.len(), 1);
-        assert_eq!(publisher.published().len(), 1);
+        assert_eq!(published.len(), 2);
+        assert_eq!(publisher.published().len(), 2);
     }
 
     #[tokio::test]

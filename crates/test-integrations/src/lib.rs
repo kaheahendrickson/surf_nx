@@ -507,7 +507,6 @@ mod tests {
 
     #[tokio::test(flavor = "multi_thread")]
     #[serial]
-    #[ignore = "follow.created events only published for tracked address; tests use dynamic keypairs"]
     async fn signals_follow() {
         let ctx = get_context().await;
         let authority_path = ensure_initialized(ctx).await;
@@ -535,7 +534,6 @@ mod tests {
 
     #[tokio::test(flavor = "multi_thread")]
     #[serial]
-    #[ignore = "follow.removed events only published for tracked address; tests use dynamic keypairs"]
     async fn signals_unfollow() {
         let ctx = get_context().await;
         let authority_path = ensure_initialized(ctx).await;
@@ -568,7 +566,6 @@ mod tests {
 
     #[tokio::test(flavor = "multi_thread")]
     #[serial]
-    #[ignore = "follow.created events only published for tracked address; tests use dynamic keypairs"]
     async fn signals_follow_name() {
         let ctx = get_context().await;
         let authority_path = ensure_initialized(ctx).await;
@@ -607,7 +604,6 @@ mod tests {
 
     #[tokio::test(flavor = "multi_thread")]
     #[serial]
-    #[ignore = "follow.removed events only published for tracked address; tests use dynamic keypairs"]
     async fn signals_unfollow_name() {
         let ctx = get_context().await;
         let authority_path = ensure_initialized(ctx).await;
