@@ -14,9 +14,11 @@ serde_json = { workspace = true }
 solana-keypair = { workspace = true }
 solana-pubkey = { workspace = true }
 solana-signer = { workspace = true }
+solana-signature = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "sync"] }
 reqwest = { workspace = true, features = ["json"] }
 dotenvy = { workspace = true }
+surf-events = { path = "../surf-events" }
 
 [dev-dependencies]
 serial_test = { workspace = true }
