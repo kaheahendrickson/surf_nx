@@ -11,7 +11,7 @@ pub struct TestWebServicesContext {
     _temp_dir: TempDir,
     nats: NatsServerGuard,
     validator: RpcValidatorGuard,
-    events: EventsServerGuard,
+    _events: EventsServerGuard,
     _config: WebServicesConfig,
 }
 
@@ -47,7 +47,7 @@ impl TestWebServicesContext {
             _temp_dir: temp_dir,
             nats,
             validator,
-            events,
+            _events: events,
             _config: config,
         })
     }
