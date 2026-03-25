@@ -19,6 +19,9 @@ pub enum SyncError {
 
     #[error("failed to publish event: {0}")]
     Publish(#[from] EventPublishError),
+
+    #[error("sync error: {0}")]
+    Sync(#[from] surf_sync::SyncError),
 }
 
 #[derive(Debug, Error)]

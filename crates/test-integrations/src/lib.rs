@@ -337,7 +337,6 @@ mod tests {
 
     #[tokio::test(flavor = "multi_thread")]
     #[serial]
-    #[ignore = "balance.updated events only published for tracked address; tests use dynamic keypairs"]
     async fn token_mint() {
         let ctx = get_context().await;
         let authority_path = ensure_initialized(ctx).await;
@@ -352,8 +351,9 @@ mod tests {
         assert_eq!(result["recipient"], recipient.to_string());
         assert_eq!(result["amount"], 5000);
 
-        // Note: balance.updated events are only published for the tracked address
-        // Events verification skipped as tests use dynamically generated keypairs
+        let event = ctx.wait_for_balance_event(&recipient).await;
+        IntegrationTestContext::verify_event_fields(&event, &[("event_type", "balance.updated")]);
+        assert_eq!(event["owner"], recipient.to_string());
 
         let balance: Value = ctx.run_cli(&["query", "balance", &recipient.to_string()]);
         assert_eq!(balance["balance"], 5000);
@@ -361,7 +361,6 @@ mod tests {
 
     #[tokio::test(flavor = "multi_thread")]
     #[serial]
-    #[ignore = "activity.recorded events only published for tracked address; tests use dynamic keypairs"]
     async fn token_transfer() {
         let ctx = get_context().await;
         let authority_path = ensure_initialized(ctx).await;
@@ -380,8 +379,22 @@ mod tests {
 
         assert_eq!(result["status"], "ok");
 
-        // Note: activity.recorded events are only published for the tracked address
-        // Events verification skipped as tests use dynamically generated keypairs
+        let sender_event = ctx.wait_for_balance_event(&sender).await;
+        IntegrationTestContext::verify_event_fields(&sender_event, &[("event_type", "balance.updated")]);
+        assert_eq!(sender_event["owner"], sender.to_string());
+
+        let activity_event = ctx.wait_for_activity_event(&sender).await;
+        IntegrationTestContext::verify_event_fields(&activity_event, &[
+            ("event_type", "activity.recorded"),
+            ("kind", "2"),
+        ]);
+        assert_eq!(activity_event["owner"], sender.to_string());
+        assert_eq!(activity_event["counterparty"], recipient.to_string());
+        assert_eq!(activity_event["amount"], 3000);
+
+        let recipient_event = ctx.wait_for_balance_event(&recipient).await;
+        IntegrationTestContext::verify_event_fields(&recipient_event, &[("event_type", "balance.updated")]);
+        assert_eq!(recipient_event["owner"], recipient.to_string());
 
         let sender_balance: Value = ctx.run_cli(&["query", "balance", &sender.to_string()]);
         assert_eq!(sender_balance["balance"], 7000);
@@ -392,7 +405,6 @@ mod tests {
 
     #[tokio::test(flavor = "multi_thread")]
     #[serial]
-    #[ignore = "balance.updated events only published for tracked address; tests use dynamic keypairs"]
     async fn token_burn() {
         let ctx = get_context().await;
         let authority_path = ensure_initialized(ctx).await;
@@ -410,8 +422,9 @@ mod tests {
 
         assert_eq!(result["status"], "ok");
 
-        // Note: balance.updated events are only published for the tracked address
-        // Events verification skipped as tests use dynamically generated keypairs
+        let event = ctx.wait_for_balance_event(&holder).await;
+        IntegrationTestContext::verify_event_fields(&event, &[("event_type", "balance.updated")]);
+        assert_eq!(event["owner"], holder.to_string());
 
         let balance: Value = ctx.run_cli(&["query", "balance", &holder.to_string()]);
         assert_eq!(balance["balance"], 6000);

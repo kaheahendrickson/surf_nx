@@ -12,8 +12,7 @@ async fn main() {
         std::env::var("SURF_EVENTS_STREAM").unwrap_or_else(|_| "surf-events".to_owned());
     let tracked_address = std::env::var("SURF_EVENTS_TRACKED_ADDRESS")
         .ok()
-        .and_then(|value| value.parse().ok())
-        .unwrap_or_else(solana_pubkey::Pubkey::new_unique);
+        .and_then(|value| value.parse().ok());
     let token_program = std::env::var("SURF_TOKEN_PROGRAM")
         .or_else(|_| std::env::var("SURF_TOKEN_PROGRAM_ID"))
         .ok()

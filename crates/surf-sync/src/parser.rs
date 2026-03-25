@@ -13,6 +13,8 @@ pub const REGISTER_DISCRIMINATOR: u8 = 1;
 pub const SIGNAL_DISCRIMINATOR: u8 = surf_protocol::instruction::signals::SIGNAL_DISCRIMINATOR;
 pub const TOKEN_TRANSFER_DISCRIMINATOR: u8 =
     surf_protocol::instruction::token::TRANSFER_DISCRIMINATOR;
+pub const TOKEN_MINT_DISCRIMINATOR: u8 = surf_protocol::instruction::token::MINT_DISCRIMINATOR;
+pub const TOKEN_BURN_DISCRIMINATOR: u8 = surf_protocol::instruction::token::BURN_DISCRIMINATOR;
 pub const SYSTEM_TRANSFER_DISCRIMINATOR: u32 = 2;
 
 /// Parsed Register instruction data.
@@ -37,6 +39,16 @@ pub struct ParsedTransfer {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ParsedSolTransfer {
+    pub amount: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ParsedMint {
+    pub amount: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ParsedBurn {
     pub amount: u64,
 }
 
@@ -104,6 +116,42 @@ pub fn parse_token_transfer_instruction(data: &[u8]) -> Result<ParsedTransfer, S
     }
 
     Ok(ParsedTransfer {
+        amount: u64::from_le_bytes(
+            data[1..9]
+                .try_into()
+                .map_err(|_| SyncError::InvalidInstruction)?,
+        ),
+    })
+}
+
+pub fn is_token_mint_instruction(data: &[u8]) -> bool {
+    !data.is_empty() && data[0] == TOKEN_MINT_DISCRIMINATOR
+}
+
+pub fn parse_token_mint_instruction(data: &[u8]) -> Result<ParsedMint, SyncError> {
+    if !is_token_mint_instruction(data) || data.len() < 9 {
+        return Err(SyncError::InvalidInstruction);
+    }
+
+    Ok(ParsedMint {
+        amount: u64::from_le_bytes(
+            data[1..9]
+                .try_into()
+                .map_err(|_| SyncError::InvalidInstruction)?,
+        ),
+    })
+}
+
+pub fn is_token_burn_instruction(data: &[u8]) -> bool {
+    !data.is_empty() && data[0] == TOKEN_BURN_DISCRIMINATOR
+}
+
+pub fn parse_token_burn_instruction(data: &[u8]) -> Result<ParsedBurn, SyncError> {
+    if !is_token_burn_instruction(data) || data.len() < 9 {
+        return Err(SyncError::InvalidInstruction);
+    }
+
+    Ok(ParsedBurn {
         amount: u64::from_le_bytes(
             data[1..9]
                 .try_into()

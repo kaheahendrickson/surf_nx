@@ -15,3 +15,4 @@ pub use surf_events::{
     EventPayload, FollowCreated, FollowRemoved, SchemaVersion, SCHEMA_VERSION_V1,
 };
 pub use sync::follows::{FollowEventMapper, FollowSyncService};
+pub use sync::tokens::TokenSyncService;

@@ -3,3 +3,4 @@ pub mod balances;
 pub mod follows;
 pub mod helpers;
 pub mod names;
+pub mod tokens;
